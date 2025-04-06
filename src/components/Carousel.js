@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import ImageLoader from './ImageLoader.js';
 
 const CarouselContainer = styled.div`
   position: relative;
@@ -28,10 +29,11 @@ const Slide = styled.div`
   position: relative;
 `;
 
-const SlideImage = styled.img`
+const SlideImage = styled(ImageLoader)`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 `;
 
 const SlideContent = styled.div`
@@ -225,8 +227,8 @@ const Carousel = () => {
 
   // For development/testing - use placeholder images if carousel images not available
   const getImageSrc = (path) => {
-    // Fallback to placeholder if image not available
-    return path || `https://via.placeholder.com/1600x800/3498db/ffffff?text=Wardrobe+Wizard+${currentSlide + 1}`;
+    // Return the path directly, the ImageLoader will handle fallbacks if needed
+    return path;
   };
 
   return (
@@ -234,7 +236,12 @@ const Carousel = () => {
       <SlideWrapper currentSlide={currentSlide}>
         {slides.map((slide, index) => (
           <Slide key={slide.id}>
-            <SlideImage src={getImageSrc(slide.image)} alt={slide.title} />
+            <SlideImage 
+              src={getImageSrc(slide.image)} 
+              alt={slide.title}
+              fallbackSrc={`https://via.placeholder.com/1600x800/3498db/ffffff?text=Wardrobe+Wizard+${index + 1}`}
+              style={{ objectFit: 'cover', objectPosition: 'center' }}
+            />
             <SlideContent>
               <SlideTitle>{slide.title}</SlideTitle>
               <SlideDescription>{slide.description}</SlideDescription>

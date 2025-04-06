@@ -5,6 +5,8 @@ import axios from 'axios';
 import Carousel from '../components/Carousel.js';
 import ProductCard from '../components/ProductCard.js';
 import { FaArrowRight, FaTshirt, FaStar } from 'react-icons/fa';
+import { generateRandomTshirts } from '../services/productService.js';
+import ImageLoader from '../components/ImageLoader.js';
 
 const HomeContainer = styled.div`
   max-width: 1200px;
@@ -101,11 +103,12 @@ const CategoryCard = styled.div`
   }
 `;
 
-const CategoryImage = styled.img`
+const CategoryImage = styled(ImageLoader)`
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
+  object-position: center;
 `;
 
 const CategoryOverlay = styled.div`
@@ -209,31 +212,20 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
 
-  // Sample tshirt data
-  const tshirts = [
-    { id: 101, name: 'Regular Fit T-Shirt', category: 'T-Shirt', color: 'White', fit: 'Regular', price: 28.92, image: '/images/tshirts/101.jpg', rating: 4.2 },
-    { id: 102, name: 'Slim Fit T-Shirt', category: 'T-Shirt', color: 'Pink', fit: 'Slim', price: 26.09, image: '/images/tshirts/102.jpg', rating: 4.5 },
-    { id: 103, name: 'Regular Fit Graphic Tee', category: 'T-Shirt', color: 'Pink', fit: 'Regular', price: 20.93, image: '/images/tshirts/103.jpg', rating: 4.2 },
-    { id: 104, name: 'Regular Fit Solid Tee', category: 'T-Shirt', color: 'Orange', fit: 'Regular', price: 39.72, image: '/images/tshirts/104.jpg', rating: 3.7 },
-    { id: 105, name: 'Loose Fit Plain Tee', category: 'T-Shirt', color: 'White', fit: 'Loose', price: 33.79, image: '/images/tshirts/105.jpg', rating: 4.7 },
-    { id: 114, name: 'Regular Fit Graphic Tee', category: 'T-Shirt', color: 'White', fit: 'Regular', price: 35.72, image: '/images/tshirts/114.jpg', rating: 5.0 },
-    { id: 115, name: 'Regular Fit Graphic Tee', category: 'T-Shirt', color: 'Beige', fit: 'Regular', price: 48.49, image: '/images/tshirts/115.jpg', rating: 4.7 },
-    { id: 203, name: 'Loose Fit Solid Tee', category: 'T-Shirt', color: 'Black', fit: 'Loose', price: 22.50, image: '/images/tshirts/203.jpg', rating: 4.3 },
-    { id: 305, name: 'Slim Fit Premium Tee', category: 'T-Shirt', color: 'Blue', fit: 'Slim', price: 29.99, image: '/images/tshirts/305.jpg', rating: 4.8 },
-    { id: 407, name: 'Oversized Fit Tee', category: 'T-Shirt', color: 'Grey', fit: 'Oversized', price: 31.50, image: '/images/tshirts/407.jpg', rating: 4.6 }
-  ];
-
   // Fetch products
   useEffect(() => {
-    // Simulating API fetch with local data
+    // Using our product service to get random tshirts
     const fetchProducts = async () => {
       try {
-        // Sort by random for featured products
-        const shuffled = [...tshirts].sort(() => 0.5 - Math.random());
+        // Generate random tshirts using our service
+        const allTshirts = generateRandomTshirts(30);
+        
+        // Use random tshirts for featured products
+        const shuffled = [...allTshirts].sort(() => 0.5 - Math.random());
         setFeaturedProducts(shuffled.slice(0, 4));
         
         // Sort by rating for top rated products
-        const sorted = [...tshirts].sort((a, b) => 
+        const sorted = [...allTshirts].sort((a, b) => 
           parseFloat(b.rating) - parseFloat(a.rating)
         );
         setTopRatedProducts(sorted.slice(0, 4));
@@ -255,13 +247,25 @@ const Home = () => {
     setEmail('');
   };
 
-  // Categories to display
+  // Categories to display - use sample product IDs from our tshirt data
   const categories = [
-    { name: 'Regular Fit', image: '/images/tshirts/101.jpg', id: 101 },
-    { name: 'Loose Fit', image: '/images/tshirts/203.jpg', id: 203 },
-    { name: 'Slim Fit', image: '/images/tshirts/305.jpg', id: 305 },
-    { name: 'Oversized Fit', image: '/images/tshirts/407.jpg', id: 407 }
+    { name: 'Regular Fit', id: 101 },
+    { name: 'Loose Fit', id: 203 },
+    { name: 'Slim Fit', id: 305 },
+    { name: 'Oversized Fit', id: 407 }
   ];
+
+  // Function to get image path for category
+  const getCategoryImagePath = (categoryId) => {
+    try {
+      // Ensure categoryId is a number
+      const numId = Number(categoryId);
+      return `/res/tshirt/${numId}.jpg`;
+    } catch (error) {
+      console.error('Error creating category image path:', error);
+      return '/images/image1.jpeg';
+    }
+  };
 
   // Add to cart (This would be implemented with context or global state management in a real app)
   const addToCart = (product) => {
@@ -325,7 +329,20 @@ const Home = () => {
           <CategoryGrid>
             {categories.map((category, index) => (
               <CategoryCard key={index}>
-                <CategoryImage src={category.image} alt={category.name} />
+                <CategoryImage 
+                  src={getCategoryImagePath(category.id)} 
+                  alt={category.name} 
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center'
+                  }}
+                  fallbackSrc="/images/image1.jpeg"
+                  onError={() => {
+                    console.error('Category image failed to load:', category.id);
+                  }}
+                />
                 <CategoryOverlay>
                   <CategoryName>{category.name}</CategoryName>
                 </CategoryOverlay>

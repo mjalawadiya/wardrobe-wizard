@@ -1,168 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
 import { FaShoppingCart, FaHeart, FaUser, FaSearch, FaBars, FaTimes } from 'react-icons/fa';
-
-const Nav = styled.nav`
-  background-color: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 1rem 2rem;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-`;
-
-const NavContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-`;
-
-const Logo = styled(Link)`
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2c3e50;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  
-  span {
-    color: #f39c12;
-  }
-`;
-
-const NavMenu = styled.div`
-  display: flex;
-  align-items: center;
-  
-  @media (max-width: 768px) {
-    position: fixed;
-    top: 0;
-    right: ${({ isOpen }) => (isOpen ? '0' : '-100%')};
-    width: 70%;
-    height: 100vh;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding-top: 4rem;
-    background-color: white;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-    transition: right 0.3s ease;
-    z-index: 999;
-  }
-`;
-
-const NavLink = styled(Link)`
-  color: #2c3e50;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  transition: color 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  
-  &:hover {
-    color: #f39c12;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 1rem;
-    width: 100%;
-    text-align: center;
-  }
-`;
-
-const SearchContainer = styled.div`
-  position: relative;
-  margin-right: 1rem;
-  
-  @media (max-width: 768px) {
-    width: 90%;
-    margin: 1rem 0;
-  }
-`;
-
-const SearchInput = styled.input`
-  padding: 0.6rem;
-  padding-left: 2.5rem;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  outline: none;
-  width: 200px;
-  
-  &:focus {
-    border-color: #f39c12;
-  }
-  
-  @media (max-width: 768px) {
-    width: 100%;
-  }
-`;
-
-const SearchIcon = styled.div`
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #7f8c8d;
-`;
-
-const CartCount = styled.span`
-  background-color: #f39c12;
-  color: white;
-  border-radius: 50%;
-  padding: 0.1rem 0.4rem;
-  font-size: 0.7rem;
-  margin-left: 0.2rem;
-`;
-
-const MobileMenuButton = styled.button`
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #2c3e50;
-  cursor: pointer;
-  z-index: 1000;
-  
-  @media (max-width: 768px) {
-    display: block;
-  }
-`;
-
-const CloseButton = styled.button`
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #2c3e50;
-  cursor: pointer;
-  display: none;
-  
-  @media (max-width: 768px) {
-    display: block;
-  }
-`;
-
-const SearchForm = styled.form`
-  @media (max-width: 768px) {
-    width: 100%;
-    margin-bottom: 1rem;
-  }
-`;
-
-const NavLinks = styled.div`
-  display: flex;
-  align-items: center;
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    width: 100%;
-  }
-`;
+import '../styles/components/navbar.css';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -171,16 +10,31 @@ const Navbar = () => {
   const [cartCount, setCartCount] = useState(0);
   const navigate = useNavigate();
 
-  // Check if user is logged in on component mount
+  // Check if user is logged in on component mount and whenever localStorage changes
   useEffect(() => {
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      setIsLoggedIn(true);
-      
-      // Get cart count from localStorage
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      setCartCount(cart.length);
-    }
+    const checkLoginStatus = () => {
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        setIsLoggedIn(true);
+        
+        // Get cart count from localStorage
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        setCartCount(cart.length);
+      } else {
+        setIsLoggedIn(false);
+      }
+    };
+
+    // Check on initial render
+    checkLoginStatus();
+    
+    // Set up event listener for storage changes
+    window.addEventListener('storage', checkLoginStatus);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus);
+    };
   }, []);
 
   // Handle search form submission
@@ -198,6 +52,10 @@ const Navbar = () => {
     localStorage.removeItem('userData');
     localStorage.removeItem('token');
     setIsLoggedIn(false);
+    
+    // Force a re-render of other components listening for storage events
+    window.dispatchEvent(new Event('storage'));
+    
     navigate('/');
   };
 
@@ -214,69 +72,70 @@ const Navbar = () => {
   };
 
   return (
-    <Nav>
-      <NavContainer>
-        <Logo to="/">
+    <nav className="navbar">
+      <div className="nav-container">
+        <Link to="/" className="logo">
           Wardrobe<span>Wizard</span>
-        </Logo>
+        </Link>
         
-        <MobileMenuButton onClick={toggleMenu}>
+        <button className="mobile-menu-button" onClick={toggleMenu}>
           <FaBars />
-        </MobileMenuButton>
+        </button>
         
-        <NavMenu isOpen={isMenuOpen}>
-          <CloseButton onClick={toggleMenu}>
+        <div className={`nav-menu ${isMenuOpen ? 'open' : ''}`}>
+          <button className="close-button" onClick={toggleMenu}>
             <FaTimes />
-          </CloseButton>
+          </button>
           
-          <SearchForm onSubmit={handleSearch}>
-            <SearchContainer>
-              <SearchIcon>
+          <form className="search-form" onSubmit={handleSearch}>
+            <div className="search-container">
+              <div className="search-icon">
                 <FaSearch />
-              </SearchIcon>
-              <SearchInput
+              </div>
+              <input
+                className="search-input"
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </SearchContainer>
-          </SearchForm>
+            </div>
+          </form>
           
-          <NavLinks>
-            <NavLink to="/products" onClick={closeMenu}>Products</NavLink>
+          <div className="nav-links">
+            <Link to="/products" className="nav-link" onClick={closeMenu}>Products</Link>
             
-            <NavLink to="/cart" onClick={closeMenu}>
+            <Link to="/cart" className="nav-link" onClick={closeMenu}>
               <FaShoppingCart />
               Cart
-              {cartCount > 0 && <CartCount>{cartCount}</CartCount>}
-            </NavLink>
+              {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+            </Link>
             
-            <NavLink to="/wishlist" onClick={closeMenu}>
+            <Link to="/wishlist" className="nav-link" onClick={closeMenu}>
               <FaHeart />
               Wishlist
-            </NavLink>
+            </Link>
             
             {isLoggedIn ? (
               <>
-                <NavLink to="/account" onClick={closeMenu}>
+                <Link to="/account" className="nav-link" onClick={closeMenu}>
                   <FaUser />
                   Account
-                </NavLink>
-                <NavLink to="/" onClick={() => { handleLogout(); closeMenu(); }}>
+                </Link>
+                <Link to="/" className="nav-link" onClick={() => { handleLogout(); closeMenu(); }}>
                   Logout
-                </NavLink>
+                </Link>
               </>
             ) : (
-              <NavLink to="/login" onClick={closeMenu}>
+              <Link to="/login" className="nav-link" onClick={closeMenu}>
                 <FaUser />
                 Login
-              </NavLink>
+              </Link>
             )}
-          </NavLinks>
-        </NavMenu>
-      </NavContainer>
-    </Nav>
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 };
 

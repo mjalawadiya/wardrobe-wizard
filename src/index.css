@@ -11,3 +11,43 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Global fix for image rendering issues */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Spinner animation for loading images */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Force image loading */
+img::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f8f8f8;
+}
+
+/* Image placeholders */
+.img-placeholder {
+  background-color: #f8f8f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.img-placeholder::after {
+  content: '🖼️';
+  font-size: 2rem;
+  opacity: 0.5;
+}

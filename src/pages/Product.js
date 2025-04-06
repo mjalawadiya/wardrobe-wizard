@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import ProductCard from '../components/ProductCard.js';
 import { FaFilter, FaSort, FaTimes } from 'react-icons/fa';
+import { generateRandomTshirts, getTshirtImagePath } from '../services/productService.js';
 
 const ProductsContainer = styled.div`
   max-width: 1200px;
@@ -55,48 +56,15 @@ const Product = ({ searchQuery }) => {
   const categoryParam = queryParams.get('category');
   const filterParam = queryParams.get('filter');
 
-  // Sample tshirt data - same as in Home.js
-  const tshirts = [
-    { id: 101, name: 'Regular Fit T-Shirt', category: 'T-Shirt', color: 'White', fit: 'Regular Fit', price: 28.92, image: '/images/tshirts/101.jpg', rating: 4.2 },
-    { id: 102, name: 'Slim Fit T-Shirt', category: 'T-Shirt', color: 'Pink', fit: 'Slim Fit', price: 26.09, image: '/images/tshirts/102.jpg', rating: 4.5 },
-    { id: 103, name: 'Regular Fit Graphic Tee', category: 'T-Shirt', color: 'Pink', fit: 'Regular Fit', price: 20.93, image: '/images/tshirts/103.jpg', rating: 4.2 },
-    { id: 104, name: 'Regular Fit Solid Tee', category: 'T-Shirt', color: 'Orange', fit: 'Regular Fit', price: 39.72, image: '/images/tshirts/104.jpg', rating: 3.7 },
-    { id: 105, name: 'Loose Fit Plain Tee', category: 'T-Shirt', color: 'White', fit: 'Loose Fit', price: 33.79, image: '/images/tshirts/105.jpg', rating: 4.7 },
-    { id: 114, name: 'Regular Fit Graphic Tee', category: 'T-Shirt', color: 'White', fit: 'Regular Fit', price: 35.72, image: '/images/tshirts/114.jpg', rating: 5.0 },
-    { id: 115, name: 'Regular Fit Graphic Tee', category: 'T-Shirt', color: 'Beige', fit: 'Regular Fit', price: 48.49, image: '/images/tshirts/115.jpg', rating: 4.7 },
-    { id: 203, name: 'Loose Fit Solid Tee', category: 'T-Shirt', color: 'Black', fit: 'Loose Fit', price: 22.50, image: '/images/tshirts/203.jpg', rating: 4.3 },
-    { id: 305, name: 'Slim Fit Premium Tee', category: 'T-Shirt', color: 'Blue', fit: 'Slim Fit', price: 29.99, image: '/images/tshirts/305.jpg', rating: 4.8 },
-    { id: 407, name: 'Oversized Fit Tee', category: 'T-Shirt', color: 'Grey', fit: 'Oversized Fit', price: 31.50, image: '/images/tshirts/407.jpg', rating: 4.6 },
-    { id: 201, name: 'Loose Fit Comfy Tee', category: 'T-Shirt', color: 'Blue', fit: 'Loose Fit', price: 24.95, image: '/images/tshirts/201.jpg', rating: 4.4 },
-    { id: 202, name: 'Loose Fit Casual Tee', category: 'T-Shirt', color: 'Red', fit: 'Loose Fit', price: 26.75, image: '/images/tshirts/202.jpg', rating: 4.1 },
-    { id: 301, name: 'Slim Fit Fashion Tee', category: 'T-Shirt', color: 'Black', fit: 'Slim Fit', price: 34.99, image: '/images/tshirts/301.jpg', rating: 4.7 },
-    { id: 302, name: 'Slim Fit Modern Tee', category: 'T-Shirt', color: 'White', fit: 'Slim Fit', price: 31.25, image: '/images/tshirts/302.jpg', rating: 4.6 },
-    { id: 401, name: 'Oversized Street Tee', category: 'T-Shirt', color: 'Black', fit: 'Oversized Fit', price: 38.50, image: '/images/tshirts/401.jpg', rating: 4.9 },
-    { id: 402, name: 'Oversized Trend Tee', category: 'T-Shirt', color: 'Grey', fit: 'Oversized Fit', price: 36.75, image: '/images/tshirts/402.jpg', rating: 4.8 }
-  ];
-
-  // Additional tshirts by adding more from the dataset
-  for (let i = 106; i <= 120; i++) {
-    if (i !== 114 && i !== 115) { // Skip already added ones
-      tshirts.push({
-        id: i,
-        name: `T-Shirt ${i}`,
-        category: 'T-Shirt',
-        color: ['Black', 'White', 'Blue', 'Grey', 'Red'][Math.floor(Math.random() * 5)],
-        fit: ['Regular Fit', 'Slim Fit', 'Loose Fit', 'Oversized Fit'][Math.floor(Math.random() * 4)],
-        price: (Math.random() * 30 + 15).toFixed(2),
-        image: `/images/tshirts/${i}.jpg`,
-        rating: (Math.random() * 2 + 3).toFixed(1)
-      });
-    }
-  }
-
   // Load products
   useEffect(() => {
     setLoading(true);
-    // Simulate API call
+    
+    // Use our product service instead of hardcoded data
     setTimeout(() => {
-      setProducts(tshirts);
+      // Generate a larger set of random products
+      const productData = generateRandomTshirts(50);
+      setProducts(productData);
       setLoading(false);
     }, 500);
   }, []);
@@ -177,7 +145,7 @@ const Product = ({ searchQuery }) => {
     // Implement wishlist functionality
   };
 
-  return (
+    return (
     <ProductsContainer>
       <ProductsTitle>
         {categoryParam ? `${categoryParam} T-Shirts` : 
@@ -225,7 +193,6 @@ const Product = ({ searchQuery }) => {
               name={product.name}
               price={product.price}
               rating={product.rating}
-              image={product.image}
               category={product.fit}
               addToCart={handleAddToCart}
               addToWishlist={handleAddToWishlist}
