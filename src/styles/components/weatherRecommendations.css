@@ -1,0 +1,265 @@
+.weather-recommendations {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+}
+
+.weather-recommendations:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.weather-recommendations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.weather-recommendations-title {
+  font-size: 1.6rem;
+  color: #2c3e50;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.weather-recommendations-title svg {
+  color: #f39c12;
+}
+
+.weather-info {
+  display: flex;
+  align-items: center;
+  background-color: #f8f9fa;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.weather-icon {
+  width: 50px;
+  height: 50px;
+  margin-right: 1rem;
+}
+
+.weather-details {
+  flex: 1;
+}
+
+.weather-temp {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.weather-desc {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+.weather-condition {
+  background-color: #e8f4fd;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  margin-left: 1rem;
+  color: #3498db;
+  font-size: 0.9rem;
+}
+
+.weather-location {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  font-size: 1rem;
+  color: #2c3e50;
+}
+
+.city-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
+}
+
+.city-input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.city-button {
+  background-color: #f39c12;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.city-button:hover {
+  background-color: #e67e22;
+}
+
+/* New styles for product recommendations */
+.product-recommendations {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.2rem;
+  margin-top: 1rem;
+}
+
+.product-card-container {
+  transition: all 0.3s ease;
+}
+
+.product-card-container:hover {
+  transform: translateY(-5px);
+}
+
+.view-more-container {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.view-more-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #f39c12;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.7rem 1.5rem;
+  border: 2px solid #f39c12;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+.view-more-link:hover {
+  background-color: #f39c12;
+  color: white;
+}
+
+.error-message {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+  padding: 1rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+
+@media (max-width: 768px) {
+  .weather-recommendations-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .weather-location {
+    margin-left: 0;
+    margin-top: 1rem;
+  }
+  
+  .product-recommendations {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  .weather-condition {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .weather-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .weather-icon {
+    margin-bottom: 0.5rem;
+  }
+  
+  .weather-location {
+    margin-top: 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .city-form {
+    margin-left: 0;
+    margin-top: 0.5rem;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .city-input {
+    flex: 1;
+  }
+  
+  .product-recommendations {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Auth required message */
+.auth-required {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.auth-message {
+  text-align: center;
+  padding: 2rem;
+  max-width: 450px;
+}
+
+.auth-icon {
+  font-size: 2.5rem;
+  color: #f39c12;
+  margin-bottom: 1rem;
+}
+
+.auth-message h3 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.auth-message p {
+  color: #7f8c8d;
+  margin-bottom: 1.5rem;
+}
+
+.auth-button {
+  background-color: #f39c12;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 0.8rem 2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.auth-button:hover {
+  background-color: #e67e22;
+} 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import ProductCard from '../components/ProductCard.js';
-import { FaFilter, FaSort, FaTimes, FaCloudSun } from 'react-icons/fa';
+import { FaFilter, FaSort, FaTimes, FaCloudSun, FaSearch } from 'react-icons/fa';
 import { generateRandomTshirts, getProductsByWeatherCondition } from '../services/productService.js';
 
 const ProductsContainer = styled.div`
@@ -60,18 +60,75 @@ const NoResults = styled.div`
   grid-column: 1 / -1;
 `;
 
+const SearchContainer = styled.div`
+  width: 100%;
+  margin-bottom: 1.5rem;
+  position: relative;
+`;
+
+const SearchForm = styled.form`
+  display: flex;
+  width: 100%;
+`;
+
+const SearchInput = styled.input`
+  flex: 1;
+  padding: 0.8rem;
+  padding-left: 3rem;
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s;
+  
+  &:focus {
+    border-color: #f39c12;
+  }
+`;
+
+const SearchButton = styled.button`
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  transition: color 0.2s;
+  
+  &:hover {
+    color: #f39c12;
+  }
+`;
+
 const Product = ({ searchQuery }) => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState('');
   const [filterOption, setFilterOption] = useState('');
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
   
   const location = useLocation();
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const categoryParam = queryParams.get('category');
   const filterParam = queryParams.get('filter');
   const weatherParam = queryParams.get('weather');
+  const searchParam = queryParams.get('search');
+
+  // Initialize local search query from URL params
+  useEffect(() => {
+    if (searchParam) {
+      setLocalSearchQuery(searchParam);
+    }
+  }, [searchParam]);
 
   // Load products
   useEffect(() => {
@@ -98,9 +155,9 @@ const Product = ({ searchQuery }) => {
   useEffect(() => {
     let filtered = [...products];
     
-    // Apply search filter
-    if (searchQuery && searchQuery.trim() !== '') {
-      const query = searchQuery.toLowerCase();
+    // Apply search filter from URL parameter
+    if (searchParam && searchParam.trim() !== '') {
+      const query = searchParam.toLowerCase();
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(query) ||
         product.category.toLowerCase().includes(query) ||
@@ -158,7 +215,7 @@ const Product = ({ searchQuery }) => {
     }
     
     setFilteredProducts(filtered);
-  }, [products, searchQuery, categoryParam, filterParam, sortOption, filterOption]);
+  }, [products, searchParam, categoryParam, filterParam, sortOption, filterOption]);
 
   // Get the right title based on parameters
   const getPageTitle = () => {
@@ -193,6 +250,17 @@ const Product = ({ searchQuery }) => {
     // Implement wishlist functionality
   };
 
+  // Handle search form submission
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (localSearchQuery.trim()) {
+      // Create new URL with updated search param
+      const params = new URLSearchParams(location.search);
+      params.set('search', localSearchQuery);
+      navigate(`/products?${params.toString()}`);
+    }
+  };
+
   return (
     <ProductsContainer>
       <ProductsTitle>{getPageTitle()}</ProductsTitle>
@@ -202,6 +270,21 @@ const Product = ({ searchQuery }) => {
           <FaCloudSun /> Showing items suitable for {getPageTitle()}
         </WeatherBadge>
       )}
+      
+      {/* Search bar */}
+      <SearchContainer>
+        <SearchForm onSubmit={handleSearch}>
+          <SearchButton type="submit">
+            <FaSearch />
+          </SearchButton>
+          <SearchInput
+            type="text"
+            placeholder="Search products..."
+            value={localSearchQuery}
+            onChange={(e) => setLocalSearchQuery(e.target.value)}
+          />
+        </SearchForm>
+      </SearchContainer>
       
       <FiltersContainer>
         <FilterSelect 

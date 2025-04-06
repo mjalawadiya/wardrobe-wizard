@@ -47,7 +47,7 @@ function App() {
           } />
           <Route path="/products" element={
             <WeatherProtectedRoute>
-              <Product searchQuery="" />
+              <Product />
             </WeatherProtectedRoute>
           } />
           <Route path="/cart" element={<CartPage cart={[]} />} />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaHeart, FaUser, FaSearch, FaBars, FaTimes, FaSignOutAlt } from 'react-icons/fa';
+import { FaShoppingCart, FaHeart, FaUser, FaBars, FaTimes, FaSignOutAlt, FaTshirt, FaUserPlus } from 'react-icons/fa';
 import '../styles/components/navbar.css';
 import styled from 'styled-components';
 
@@ -111,7 +111,6 @@ const TopLogoutButton = styled.button`
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [userData, setUserData] = useState(null);
@@ -158,16 +157,6 @@ const Navbar = () => {
       window.removeEventListener('userLogout', checkLoginStatus);
     };
   }, []);
-
-  // Handle search form submission
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${searchQuery}`);
-      setSearchQuery('');
-      setIsMenuOpen(false);
-    }
-  };
 
   // Handle logout
   const handleLogout = () => {
@@ -247,25 +236,13 @@ const Navbar = () => {
             )}
           </div>
           
-          {/* Search inside sidebar */}
-          <form className="search-form" onSubmit={handleSearch}>
-            <div className="search-container">
-              <div className="search-icon">
-                <FaSearch />
-              </div>
-              <input
-                className="search-input"
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </form>
-          
+          {/* Navigation Links */}
           <NavMenu>
             <NavItem>
-              <NavLink to="/products">Products</NavLink>
+              <NavLink to="/products">
+                <FaTshirt />
+                Products
+              </NavLink>
             </NavItem>
             
             {isLoggedIn ? (
@@ -311,6 +288,7 @@ const Navbar = () => {
                 </NavItem>
                 <NavItem>
                   <NavLink to="/register">
+                    <FaUserPlus />
                     Register
                   </NavLink>
                 </NavItem>

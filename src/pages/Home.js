@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
 import Carousel from '../components/Carousel.js';
 import ProductCard from '../components/ProductCard.js';
 import WeatherRecommendations from '../components/WeatherRecommendations.js';
-import { FaArrowRight, FaTshirt, FaStar } from 'react-icons/fa';
+import { FaArrowRight, FaTshirt, FaStar, FaSearch } from 'react-icons/fa';
 import { generateRandomTshirts } from '../services/productService.js';
 import ImageLoader from '../components/ImageLoader.js';
 
@@ -207,12 +207,63 @@ const LoadingMessage = styled.div`
   color: #7f8c8d;
 `;
 
+const SearchContainer = styled.div`
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  position: relative;
+`;
+
+const SearchForm = styled.form`
+  display: flex;
+  width: 100%;
+`;
+
+const SearchInput = styled.input`
+  flex: 1;
+  padding: 0.8rem;
+  padding-left: 3rem;
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  
+  &:focus {
+    border-color: #f39c12;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const SearchButton = styled.button`
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  transition: color 0.2s;
+  
+  &:hover {
+    color: #f39c12;
+  }
+`;
+
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [topRatedProducts, setTopRatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [userData, setUserData] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   // Get user data and set up event listeners for login/logout
   useEffect(() => {
@@ -282,6 +333,15 @@ const Home = () => {
     setEmail('');
   };
 
+  // Handle search form submission
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${searchQuery}`);
+      setSearchQuery('');
+    }
+  };
+
   // Categories to display - use sample product IDs from our tshirt data
   const categories = [
     { name: 'Regular Fit', id: 101 },
@@ -318,6 +378,21 @@ const Home = () => {
       <HomeSubtitle>
         Discover the perfect outfit for every occasion. Quality clothing, curated just for you.
       </HomeSubtitle>
+
+      {/* Search bar */}
+      <SearchContainer>
+        <SearchForm onSubmit={handleSearch}>
+          <SearchButton type="submit">
+            <FaSearch />
+          </SearchButton>
+          <SearchInput
+            type="text"
+            placeholder="Search for products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </SearchForm>
+      </SearchContainer>
 
       {/* Weather recommendations for logged-in users only */}
       {userData ? <WeatherRecommendations /> : null}
