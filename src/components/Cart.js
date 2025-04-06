@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaTrash, FaArrowLeft, FaCreditCard, FaPlus, FaMinus } from 'react-icons/fa';
 import axios from 'axios';
 import '../styles/components/cart.css';
@@ -9,6 +9,8 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userData, setUserData] = useState(null);
+
+  const navigate = useNavigate();
 
   // Get user data and cart items
   useEffect(() => {
@@ -135,8 +137,18 @@ const Cart = () => {
 
   // Handle checkout
   const handleCheckout = () => {
-    // For now, just show an alert
-    alert('Checkout functionality will be implemented in the future.');
+    if (!userData) {
+      setError('Please log in to proceed to checkout');
+      return;
+    }
+    
+    if (cartItems.length === 0) {
+      alert('Your cart is empty. Add some products before checking out.');
+      return;
+    }
+    
+    // Navigate to checkout page
+    navigate('/checkout');
   };
 
   if (loading) {

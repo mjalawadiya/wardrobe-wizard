@@ -10,9 +10,12 @@ import Navbar from './components/Navbar.js';
 import Footer from './components/Footer.js';
 import Product from './pages/Product.js';
 import CartPage from './pages/CartPage.js';
+import CheckoutPage from './pages/CheckoutPage.js';
 import Account from './pages/Account.js';
 import AuthGuard from './components/AuthGuard.js';
 import UserProfile from './components/UserProfile.js';
+import AboutPage from './pages/AboutPage.js';
+import TermsPage from './pages/TermsPage.js';
 import './App.css';
 
 // Custom route component to handle weather-based product routes
@@ -51,6 +54,11 @@ function App() {
             </WeatherProtectedRoute>
           } />
           <Route path="/cart" element={<CartPage cart={[]} />} />
+          <Route path="/checkout" element={
+            <AuthGuard>
+              <CheckoutPage />
+            </AuthGuard>
+          } />
           <Route path="/account" element={
             <AuthGuard>
               <Account />
@@ -61,6 +69,8 @@ function App() {
               <UserProfile />
             </AuthGuard>
           } />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/terms" element={<TermsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

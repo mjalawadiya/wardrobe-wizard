@@ -1,6 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaHeart, FaUser, FaBars, FaTimes, FaSignOutAlt, FaTshirt, FaUserPlus } from 'react-icons/fa';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { 
+  FaShoppingCart, 
+  FaHeart, 
+  FaUser, 
+  FaBars, 
+  FaTimes, 
+  FaSignOutAlt, 
+  FaTshirt, 
+  FaUserPlus, 
+  FaHome,
+  FaStore,
+  FaClipboardList
+} from 'react-icons/fa';
 import '../styles/components/navbar.css';
 import styled from 'styled-components';
 
@@ -8,14 +20,14 @@ import styled from 'styled-components';
 const NavMenu = styled.ul`
   list-style: none;
   padding: 0;
-  margin: 1rem 0;
+  margin: 0.5rem 0;
   width: 100%;
   display: flex;
   flex-direction: column;
 `;
 
 const NavItem = styled.li`
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.2rem;
   width: 100%;
 `;
 
@@ -114,7 +126,10 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [userData, setUserData] = useState(null);
+  const [cartBadgeNew, setCartBadgeNew] = useState(false);
+  const menuRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Check if user is logged in on component mount and whenever localStorage changes
   useEffect(() => {
@@ -158,6 +173,76 @@ const Navbar = () => {
     };
   }, []);
 
+  // Listen for cart item added event
+  useEffect(() => {
+    const handleCartItemAdded = () => {
+      setCartBadgeNew(true);
+      
+      // Remove the "new" class after animation completes
+      setTimeout(() => {
+        setCartBadgeNew(false);
+      }, 1800); // 3 iterations of the 0.6s animation
+    };
+    
+    window.addEventListener('cartItemAdded', handleCartItemAdded);
+    
+    return () => {
+      window.removeEventListener('cartItemAdded', handleCartItemAdded);
+    };
+  }, []);
+
+  // Handle scroll event to close menu
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isMenuOpen]);
+
+  // Close menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
+  // Handle clicks outside the menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target) && isMenuOpen) {
+        // Check if the clicked element is not the hamburger button
+        if (!event.target.closest('.hamburger-menu-button')) {
+          setIsMenuOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
+  // Add useEffect to manage body class
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.classList.add('menu-open');
+    } else {
+      document.body.classList.remove('menu-open');
+    }
+    
+    // Cleanup
+    return () => {
+      document.body.classList.remove('menu-open');
+    };
+  }, [isMenuOpen]);
+
   // Handle logout
   const handleLogout = () => {
     localStorage.removeItem('userData');
@@ -192,7 +277,7 @@ const Navbar = () => {
       <div className="nav-container">
         {/* Left side - Hamburger Menu */}
         <div className="navbar-left">
-          <button className="hamburger-menu-button" onClick={toggleMenu}>
+          <button className="hamburger-menu-button" onClick={toggleMenu} aria-label="Menu">
             <FaBars />
           </button>
         </div>
@@ -223,63 +308,83 @@ const Navbar = () => {
         <div className={`nav-overlay ${isMenuOpen ? 'open' : ''}`} onClick={closeMenu}></div>
         
         {/* Sidebar Menu */}
-        <div className={`nav-menu ${isMenuOpen ? 'open' : ''}`}>
-          <button className="close-button" onClick={toggleMenu}>
+        <div className={`nav-menu ${isMenuOpen ? 'open' : ''}`} ref={menuRef}>
+          <button className="close-button" onClick={toggleMenu} aria-label="Close menu">
             <FaTimes />
           </button>
           
           <div className="nav-menu-header">
-            {isLoggedIn && userData && (
+            {isLoggedIn && userData ? (
               <div className="user-greeting">
                 Hello, {userData.username || userData.name || 'User'}
+              </div>
+            ) : (
+              <div className="user-greeting">
+                Welcome, Guest
               </div>
             )}
           </div>
           
           {/* Navigation Links */}
+          <div className="nav-category">Navigation</div>
           <NavMenu>
+            <NavItem>
+              <NavLink to="/">
+                <FaHome />
+                Home
+              </NavLink>
+            </NavItem>
             <NavItem>
               <NavLink to="/products">
                 <FaTshirt />
                 Products
               </NavLink>
             </NavItem>
-            
-            {isLoggedIn ? (
-              <>
-                <NavItem>
-                  <NavLink to="/cart">
-                    <CartIcon>
-                      <FaShoppingCart />
-                      {cartCount > 0 && <CartBadge>{cartCount}</CartBadge>}
-                    </CartIcon>
-                    Cart
-                  </NavLink>
-                </NavItem>
-                
-                <NavItem>
-                  <NavLink to="/wishlist">
-                    <FaHeart />
-                    Wishlist
-                  </NavLink>
-                </NavItem>
-
+          </NavMenu>
+          
+          <div className="nav-section-divider"></div>
+          
+          {isLoggedIn ? (
+            <>
+              <div className="nav-category">Account</div>
+              <NavMenu>
                 <NavItem>
                   <NavLink to="/profile">
                     <FaUser />
                     Profile
                   </NavLink>
                 </NavItem>
-                
+                <NavItem>
+                  <NavLink to="/wishlist">
+                    <FaHeart />
+                    Wishlist
+                  </NavLink>
+                </NavItem>
+                <NavItem>
+                  <NavLink to="/cart">
+                    <CartIcon>
+                      <FaShoppingCart />
+                      {cartCount > 0 && (
+                        <CartBadge className={cartBadgeNew ? 'new' : ''}>
+                          {cartCount}
+                        </CartBadge>
+                      )}
+                    </CartIcon>
+                    Cart
+                  </NavLink>
+                </NavItem>
                 <NavItem>
                   <LogoutButton onClick={handleLogout}>
                     <FaSignOutAlt />
                     Logout
                   </LogoutButton>
                 </NavItem>
-              </>
-            ) : (
-              <>
+              </NavMenu>
+            </>
+          ) : (
+            <>
+              <div className="nav-category">Account</div>
+              <NavMenu>
                 <NavItem>
                   <NavLink to="/login">
                     <FaUser />
@@ -292,8 +397,26 @@ const Navbar = () => {
                     Register
                   </NavLink>
                 </NavItem>
-              </>
-            )}
+              </NavMenu>
+            </>
+          )}
+          
+          <div className="nav-section-divider"></div>
+          
+          <div className="nav-category">Help & Info</div>
+          <NavMenu>
+            <NavItem>
+              <NavLink to="/about">
+                <FaStore />
+                About Us
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink to="/terms">
+                <FaClipboardList />
+                Terms & Conditions
+              </NavLink>
+            </NavItem>
           </NavMenu>
         </div>
       </div>

@@ -126,6 +126,9 @@ const ProductCard = (props) => {
       
       localStorage.setItem('cart', JSON.stringify(currentCart));
       
+      // Add new class to all cart badges by dispatching a custom event
+      window.dispatchEvent(new CustomEvent('cartItemAdded'));
+      
       // Trigger storage event
       window.dispatchEvent(new Event('storage'));
       

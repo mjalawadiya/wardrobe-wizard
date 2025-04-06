@@ -244,3 +244,13 @@ img:not(.active) {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 }
+
+/* Ensure menu corners are rounded */
+.nav-menu {
+  border-radius: 0 30px 30px 0 !important;
+}
+
+/* Ensure the menu has rounded corners when open */
+.nav-menu.open {
+  border-radius: 0 30px 30px 0 !important;
+}
