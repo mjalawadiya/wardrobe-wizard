@@ -1,39 +1,34 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Home from './pages/Home';
-import Product from './pages/Product';
-import CartPage from './pages/CartPage';
-import WishlistPage from './pages/WishlistPage';
+import Home from './pages/Home.js';
+import Login from './pages/Login.js';
+import Register from './pages/Register.js';
+import ProductDetail from './pages/ProductDetail.js';
+import Wishlist from './components/Wishlist.js';
+import NotFound from './pages/NotFound.js';
+import Navbar from './components/Navbar.js';
+import Footer from './components/Footer.js';
+import Product from './pages/Product.js';
+import CartPage from './pages/CartPage.js';
+import './App.css';
 
 function App() {
-  const [cart, setCart] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(""); // Centralized search state
-
-  const addToCart = (product) => {
-    setCart([...cart, product]);
-  };
-
-  const addToWishlist = (product) => {
-    setWishlist([...wishlist, product]);
-  };
-
   return (
-    <div>
-      {/* Pass setSearchQuery to Navbar so it updates searchQuery */}
-      <Navbar setSearchQuery={setSearchQuery} />
-
-      <Routes>
-        <Route path="/" element={<Home />} />
-        {/* Pass searchQuery to Product */}
-        <Route 
-          path="/product" 
-          element={<Product searchQuery={searchQuery} addToCart={addToCart} addToWishlist={addToWishlist} />} 
-        />
-        <Route path="/cart" element={<CartPage cart={cart} />} />
-        <Route path="/wishlist" element={<WishlistPage wishlist={wishlist} />} />
-      </Routes>
+    <div className="App">
+      <Navbar />
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/products" element={<Product searchQuery="" />} />
+          <Route path="/cart" element={<CartPage cart={[]} />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      <Footer />
     </div>
   );
 }
