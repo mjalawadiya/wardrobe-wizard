@@ -151,13 +151,14 @@ const Wishlist = () => {
       setLoading(true);
       try {
         // Check if user is logged in
-        const storedUser = localStorage.getItem('user');
-        if (!storedUser) {
+        const userDataString = localStorage.getItem('userData');
+        if (!userDataString) {
           setLoading(false);
+          setError('Please log in to view your wishlist');
           return;
         }
         
-        const userData = JSON.parse(storedUser);
+        const userData = JSON.parse(userDataString);
         setUser(userData);
         
         // Fetch wishlist items for this user
@@ -182,7 +183,10 @@ const Wishlist = () => {
   // Remove from wishlist
   const removeFromWishlist = async (productId) => {
     try {
-      if (!user) return;
+      if (!user) {
+        setError('Please log in to manage your wishlist');
+        return;
+      }
       
       await axios.delete('/api/wishlist', {
         data: {
@@ -207,7 +211,10 @@ const Wishlist = () => {
   // Add to cart
   const addToCart = async (productId) => {
     try {
-      if (!user) return;
+      if (!user) {
+        setError('Please log in to add items to your cart');
+        return;
+      }
       
       await axios.post('/api/cart', {
         userId: user._id,
@@ -220,6 +227,14 @@ const Wishlist = () => {
       });
       
       alert('Product added to cart!');
+      
+      // Also update local cart storage for navbar display
+      const currentCart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const updatedCart = [...currentCart, { productId, quantity: 1 }];
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      
+      // Trigger storage event
+      window.dispatchEvent(new Event('storage'));
     } catch (err) {
       console.error('Error adding to cart:', err);
       setError('Failed to add to cart. Please try again.');
@@ -249,7 +264,16 @@ const Wishlist = () => {
             <FaArrowLeft /> Continue Shopping
           </BackButton>
         </WishlistHeader>
-        <ErrorMessage>{error}</ErrorMessage>
+        <ErrorMessage>
+          {error}
+          {error.includes('log in') && (
+            <div style={{ marginTop: '1rem' }}>
+              <Link to="/login" style={{ color: '#f39c12', textDecoration: 'none', fontWeight: 'bold' }}>
+                Login here
+              </Link>
+            </div>
+          )}
+        </ErrorMessage>
       </WishlistContainer>
     );
   }

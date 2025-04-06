@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .image-test {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+    h2 {
+      margin-top: 30px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .image-container {
+      background-color: #f8f8f8;
+      padding: 10px;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Loading Test</h1>
+  
+  <div class="image-test">
+    <h2>Test Image</h2>
+    <div class="image-container">
+      <img src="/test-image.jpg" alt="Test Image" onerror="this.parentNode.innerHTML += '<p class=\'error\'>Failed to load test image</p>'">
+    </div>
+    <p>Path: /test-image.jpg</p>
+  </div>
+
+  <div class="image-test">
+    <h2>Test from /images folder</h2>
+    <div class="image-container">
+      <img src="/images/image1.jpeg" alt="Test from images" onerror="this.parentNode.innerHTML += '<p class=\'error\'>Failed to load image from /images folder</p>'">
+    </div>
+    <p>Path: /images/image1.jpeg</p>
+  </div>
+
+  <div class="image-test">
+    <h2>Test from /res/tshirt (ID: 1)</h2>
+    <div class="image-container">
+      <img src="/res/tshirt/1.jpg" alt="T-shirt 1" onerror="this.parentNode.innerHTML += '<p class=\'error\'>Failed to load image from /res/tshirt folder</p>'">
+    </div>
+    <p>Path: /res/tshirt/1.jpg</p>
+  </div>
+
+  <div class="image-test">
+    <h2>Test from /image-test endpoint</h2>
+    <div class="image-container">
+      <img src="/image-test" alt="Image test endpoint" onerror="this.parentNode.innerHTML += '<p class=\'error\'>Failed to load image from /image-test endpoint</p>'">
+    </div>
+    <p>Path: /image-test</p>
+  </div>
+
+  <script>
+    // Log all image loading attempts
+    document.addEventListener('DOMContentLoaded', function() {
+      const images = document.querySelectorAll('img');
+      images.forEach(img => {
+        img.addEventListener('load', function() {
+          console.log('Image loaded successfully:', this.src);
+          const container = this.parentNode;
+          container.innerHTML += '<p class="success">Loaded successfully</p>';
+        });
+        img.addEventListener('error', function() {
+          console.error('Image failed to load:', this.src);
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

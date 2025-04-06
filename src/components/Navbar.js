@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaHeart, FaUser, FaSearch, FaBars, FaTimes } from 'react-icons/fa';
+import { FaShoppingCart, FaHeart, FaUser, FaSearch, FaBars, FaTimes, FaSignOutAlt } from 'react-icons/fa';
 import '../styles/components/navbar.css';
 
 const Navbar = () => {
@@ -8,20 +8,30 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
 
   // Check if user is logged in on component mount and whenever localStorage changes
   useEffect(() => {
     const checkLoginStatus = () => {
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        setIsLoggedIn(true);
-        
-        // Get cart count from localStorage
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        setCartCount(cart.length);
+      const userDataString = localStorage.getItem('userData');
+      if (userDataString) {
+        try {
+          const parsedUserData = JSON.parse(userDataString);
+          setIsLoggedIn(true);
+          setUserData(parsedUserData);
+          
+          // Get cart count from localStorage
+          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+          setCartCount(cart.length);
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+          setIsLoggedIn(false);
+          setUserData(null);
+        }
       } else {
         setIsLoggedIn(false);
+        setUserData(null);
       }
     };
 
@@ -31,9 +41,15 @@ const Navbar = () => {
     // Set up event listener for storage changes
     window.addEventListener('storage', checkLoginStatus);
     
+    // Additional event listener for custom login/logout events
+    window.addEventListener('userLogin', checkLoginStatus);
+    window.addEventListener('userLogout', checkLoginStatus);
+    
     // Cleanup
     return () => {
       window.removeEventListener('storage', checkLoginStatus);
+      window.removeEventListener('userLogin', checkLoginStatus);
+      window.removeEventListener('userLogout', checkLoginStatus);
     };
   }, []);
 
@@ -52,11 +68,16 @@ const Navbar = () => {
     localStorage.removeItem('userData');
     localStorage.removeItem('token');
     setIsLoggedIn(false);
+    setUserData(null);
+    
+    // Fire custom logout event
+    window.dispatchEvent(new Event('userLogout'));
     
     // Force a re-render of other components listening for storage events
     window.dispatchEvent(new Event('storage'));
     
     navigate('/');
+    setIsMenuOpen(false);
   };
 
   // Toggle mobile menu
@@ -74,19 +95,53 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="nav-container">
-        <Link to="/" className="logo">
-          Wardrobe<span>Wizard</span>
-        </Link>
+        {/* Left side - Hamburger Menu */}
+        <div className="navbar-left">
+          <button className="hamburger-menu-button" onClick={toggleMenu}>
+            <FaBars />
+          </button>
+        </div>
         
-        <button className="mobile-menu-button" onClick={toggleMenu}>
-          <FaBars />
-        </button>
+        {/* Center - Website Title */}
+        <div className="navbar-center">
+          <Link to="/" className="logo">
+            Wardrobe<span>Wizard</span>
+          </Link>
+        </div>
         
+        {/* Right side - Logout Button */}
+        <div className="navbar-right">
+          {isLoggedIn ? (
+            <button className="nav-link logout-button" onClick={handleLogout}>
+              <FaSignOutAlt />
+              Logout
+            </button>
+          ) : (
+            <Link to="/login" className="nav-link">
+              <FaUser />
+              Login
+            </Link>
+          )}
+        </div>
+        
+        {/* Overlay for when menu is open */}
+        <div className={`nav-overlay ${isMenuOpen ? 'open' : ''}`} onClick={closeMenu}></div>
+        
+        {/* Sidebar Menu */}
         <div className={`nav-menu ${isMenuOpen ? 'open' : ''}`}>
           <button className="close-button" onClick={toggleMenu}>
             <FaTimes />
           </button>
           
+          <div className="nav-menu-header">
+            {isLoggedIn && userData && (
+              <div className="user-greeting">
+                Hello, {userData.username || 'User'}
+              </div>
+            )}
+          </div>
+          
+          {/* Search inside sidebar */}
           <form className="search-form" onSubmit={handleSearch}>
             <div className="search-container">
               <div className="search-icon">
@@ -111,26 +166,18 @@ const Navbar = () => {
               {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
             </Link>
             
-            <Link to="/wishlist" className="nav-link" onClick={closeMenu}>
-              <FaHeart />
-              Wishlist
-            </Link>
-            
-            {isLoggedIn ? (
+            {isLoggedIn && (
               <>
+                <Link to="/wishlist" className="nav-link" onClick={closeMenu}>
+                  <FaHeart />
+                  Wishlist
+                </Link>
+                
                 <Link to="/account" className="nav-link" onClick={closeMenu}>
                   <FaUser />
                   Account
                 </Link>
-                <Link to="/" className="nav-link" onClick={() => { handleLogout(); closeMenu(); }}>
-                  Logout
-                </Link>
               </>
-            ) : (
-              <Link to="/login" className="nav-link" onClick={closeMenu}>
-                <FaUser />
-                Login
-              </Link>
             )}
           </div>
         </div>

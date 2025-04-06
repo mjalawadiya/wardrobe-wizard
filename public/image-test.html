@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/" />
+  <title>Image Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    img {
+      max-width: 200px;
+      border: 1px solid #ddd;
+      margin: 10px;
+      padding: 5px;
+    }
+    .test-section {
+      margin-bottom: 30px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Loading Test</h1>
+  
+  <div class="test-section">
+    <h2>Direct Image Test</h2>
+    <p>Testing direct image tag:</p>
+    <img src="/test-image.jpg" alt="Test Image">
+    <img src="/images/image1.jpeg" alt="Fallback Image">
+  </div>
+  
+  <div class="test-section">
+    <h2>T-shirt Images Test</h2>
+    <p>Testing t-shirt images from res folder:</p>
+    <img src="/res/tshirt/91.jpg" alt="T-shirt 91">
+    <img src="/res/tshirt/92.jpg" alt="T-shirt 92">
+    <img src="/res/tshirt/93.jpg" alt="T-shirt 93">
+    <img src="/res/tshirt/94.jpg" alt="T-shirt 94">
+  </div>
+  
+  <div class="test-section">
+    <h2>Absolute vs Relative Path Test</h2>
+    <p>Comparing different path formats:</p>
+    <img src="test-image.jpg" alt="Relative path">
+    <img src="/test-image.jpg" alt="Absolute path">
+    <img src="images/image1.jpeg" alt="Relative folder path">
+    <img src="/images/image1.jpeg" alt="Absolute folder path">
+  </div>
+  
+  <script>
+    // Log any image loading errors
+    document.querySelectorAll('img').forEach(img => {
+      img.addEventListener('error', function(e) {
+        console.error('Failed to load image:', this.src);
+        this.style.border = '2px solid red';
+        const errorText = document.createElement('p');
+        errorText.textContent = `Error loading: ${this.src}`;
+        errorText.style.color = 'red';
+        this.parentNode.insertBefore(errorText, this.nextSibling);
+      });
+      
+      img.addEventListener('load', function() {
+        console.log('Successfully loaded image:', this.src);
+        this.style.border = '2px solid green';
+      });
+    });
+  </script>
+</body>
+</html> 
