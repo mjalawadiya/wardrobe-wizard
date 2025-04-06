@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaLock, FaCheckCircle, FaTimesCircle, FaEdit, FaSave, FaTimes, FaBoxOpen, FaHeart, FaHistory } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaCheckCircle, FaTimesCircle, FaEdit, FaSave, FaTimes, FaBoxOpen, FaHeart, FaHistory, FaMapMarkerAlt } from 'react-icons/fa';
 import axios from 'axios';
 import '../styles/pages/account.css';
 
@@ -16,6 +16,7 @@ const Account = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
+    city: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -51,7 +52,8 @@ const Account = () => {
         setFormData(prev => ({
           ...prev,
           username: parsedUserData.username || '',
-          email: parsedUserData.email || ''
+          email: parsedUserData.email || '',
+          city: parsedUserData.city || ''
         }));
         
         // Fetch additional user data from API (orders, etc)
@@ -115,6 +117,7 @@ const Account = () => {
   // Validate form when data changes
   useEffect(() => {
     if (isEditing) {
+      // Update validation statuses
       setValidations({
         username: formData.username.length >= 3,
         email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email),
@@ -127,25 +130,46 @@ const Account = () => {
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Update the form data with the new value
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+    
+    // Clear errors/success when user makes changes
+    if (error || success) {
+      setError('');
+      setSuccess('');
+    }
   };
   
   // Toggle edit mode
   const toggleEditMode = () => {
     if (isEditing) {
       // Revert changes if canceling edit
-      setFormData(prev => ({
-        ...prev,
+      console.log('Canceling edit, reverting form data to user data');
+      setFormData({
         username: user.username || '',
         email: user.email || '',
+        city: user.city || '',
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
-      }));
+      });
+    } else {
+      // Start editing - initialize form data from user data
+      console.log('Starting edit mode, initializing form data from user data');
+      setFormData({
+        username: user.username || '',
+        email: user.email || '',
+        city: user.city || '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
     }
+    
+    // Toggle editing state
     setIsEditing(!isEditing);
     setError('');
     setSuccess('');
@@ -153,8 +177,10 @@ const Account = () => {
   
   // Check if form is valid for submission
   const isFormValid = () => {
-    // Basic validation
-    if (!formData.username || !formData.email) return false;
+    // Basic validation for required fields
+    if (!formData.username || !formData.email) {
+      return false;
+    }
     
     // Check if there are validation errors
     if (!validations.username || !validations.email || !validations.passwordMatch || !validations.passwordLength) {
@@ -173,6 +199,13 @@ const Account = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Log validation status for debugging
+    console.log('Form validation status:', {
+      isValid: isFormValid(),
+      validations,
+      formData
+    });
+    
     if (!isFormValid()) {
       setError('Please fill in all fields correctly.');
       return;
@@ -182,21 +215,29 @@ const Account = () => {
     setSuccess('');
     
     try {
+      // Create update data object with user details
       const updateData = {
         username: formData.username,
-        email: formData.email
+        email: formData.email,
+        city: formData.city
       };
       
+      // Include password data if provided
       if (formData.newPassword) {
         updateData.currentPassword = formData.currentPassword;
         updateData.password = formData.newPassword;
       }
       
+      console.log('Sending update to server:', updateData);
+      
+      // Send update request to API
       const response = await axios.put('/api/users/profile', updateData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
+      
+      console.log('Server response:', response.data);
       
       // Update user data in state and localStorage
       const updatedData = response.data;
@@ -219,6 +260,7 @@ const Account = () => {
       window.dispatchEvent(new Event('storage'));
     } catch (err) {
       console.error('Error updating profile:', err);
+      // Extract error message from API response if available
       if (err.response && err.response.data) {
         setError(err.response.data.message || 'Failed to update profile. Please try again.');
       } else {
@@ -322,6 +364,24 @@ const Account = () => {
                 </div>
                 
                 <div className="form-group">
+                  <label htmlFor="city" className="form-label">City (for weather recommendations)</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">
+                      <FaMapMarkerAlt />
+                    </span>
+                    <input
+                      type="text"
+                      id="city"
+                      name="city"
+                      className="form-input"
+                      value={formData.city}
+                      onChange={handleChange}
+                      placeholder="Enter your city"
+                    />
+                  </div>
+                </div>
+                
+                <div className="form-group">
                   <label htmlFor="currentPassword" className="form-label">Current Password (only if changing password)</label>
                   <div className="input-wrapper">
                     <span className="input-icon">
@@ -403,6 +463,10 @@ const Account = () => {
                 <div className="info-row">
                   <div className="info-label">Email:</div>
                   <div className="info-value">{user.email}</div>
+                </div>
+                <div className="info-row">
+                  <div className="info-label">City:</div>
+                  <div className="info-value">{user.city || 'Not set'}</div>
                 </div>
                 <div className="info-row">
                   <div className="info-label">Member since:</div>

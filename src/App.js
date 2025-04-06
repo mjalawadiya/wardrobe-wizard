@@ -56,7 +56,11 @@ function App() {
               <Account />
             </AuthGuard>
           } />
-          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/profile" element={
+            <AuthGuard>
+              <UserProfile />
+            </AuthGuard>
+          } />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
