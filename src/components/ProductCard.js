@@ -1,11 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaCartPlus, FaHeart, FaStar } from 'react-icons/fa';
 import ImageLoader from './ImageLoader.js';
 import '../styles/components/productCard.css';
 
+// Helper function to preload an image
+const preloadImage = (src) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.src = src;
+    img.onload = () => resolve(true);
+    img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+  });
+};
+
 const ProductCard = (props) => {
   let { id, name, price, rating, image, discount, isNew, category, addToCart, addToWishlist, product } = props;
+  
+  // State to track if we should preload the detail image
+  const [isHovered, setIsHovered] = useState(false);
   
   // Calculate discount percentage
   const hasDiscount = discount && discount < price;
@@ -44,6 +57,20 @@ const ProductCard = (props) => {
     }
   };
 
+  // Handle mouse enter event to preload detail image
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    const detailImagePath = getImagePath();
+    // Preload the image to ensure it's cached when navigating to the detail page
+    preloadImage(detailImagePath)
+      .then(() => console.log('Detail image preloaded:', detailImagePath))
+      .catch(error => console.error('Failed to preload detail image:', error));
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
   const handleAddToCart = () => {
     if (addToCart) {
       addToCart({ id, name, price, image });
@@ -57,7 +84,7 @@ const ProductCard = (props) => {
   };
 
   return (
-    <div className="product-card">
+    <div className="product-card" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <Link to={`/product/${id}`}>
         <div className="image-container">
           <ImageLoader 
