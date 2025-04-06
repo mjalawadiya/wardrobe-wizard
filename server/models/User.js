@@ -20,6 +20,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: 6
+  },
+  city: {
+    type: String,
+    default: 'London',
+    trim: true
   }
 }, {
   timestamps: true

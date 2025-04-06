@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import ProductCard from '../components/ProductCard.js';
-import { FaFilter, FaSort, FaTimes } from 'react-icons/fa';
-import { generateRandomTshirts, getTshirtImagePath } from '../services/productService.js';
+import { FaFilter, FaSort, FaTimes, FaCloudSun } from 'react-icons/fa';
+import { generateRandomTshirts, getProductsByWeatherCondition } from '../services/productService.js';
 
 const ProductsContainer = styled.div`
   max-width: 1200px;
@@ -31,6 +31,22 @@ const FilterSelect = styled.select`
   background-color: white;
 `;
 
+const WeatherBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #e8f4fd;
+  color: #3498db;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  
+  svg {
+    color: #f39c12;
+  }
+`;
+
 const ProductGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -55,19 +71,28 @@ const Product = ({ searchQuery }) => {
   const queryParams = new URLSearchParams(location.search);
   const categoryParam = queryParams.get('category');
   const filterParam = queryParams.get('filter');
+  const weatherParam = queryParams.get('weather');
 
   // Load products
   useEffect(() => {
     setLoading(true);
     
-    // Use our product service instead of hardcoded data
-    setTimeout(() => {
-      // Generate a larger set of random products
-      const productData = generateRandomTshirts(50);
-      setProducts(productData);
+    // Check if we're filtering by weather condition
+    if (weatherParam) {
+      // Get products suitable for the weather condition
+      const weatherProducts = getProductsByWeatherCondition(weatherParam, 20);
+      setProducts(weatherProducts);
       setLoading(false);
-    }, 500);
-  }, []);
+    } else {
+      // Use our product service instead of hardcoded data
+      setTimeout(() => {
+        // Generate a larger set of random products
+        const productData = generateRandomTshirts(50);
+        setProducts(productData);
+        setLoading(false);
+      }, 500);
+    }
+  }, [weatherParam]);
 
   // Filter and sort products
   useEffect(() => {
@@ -135,6 +160,29 @@ const Product = ({ searchQuery }) => {
     setFilteredProducts(filtered);
   }, [products, searchQuery, categoryParam, filterParam, sortOption, filterOption]);
 
+  // Get the right title based on parameters
+  const getPageTitle = () => {
+    if (weatherParam) {
+      const weatherTitles = {
+        'hot': 'Hot Weather',
+        'moderate': 'Moderate Weather',
+        'cold': 'Cold Weather',
+        'rain': 'Rainy Weather',
+        'snow': 'Snowy Weather',
+        'windy': 'Windy Weather'
+      };
+      return `${weatherTitles[weatherParam] || 'Weather-Suitable'} Clothing`;
+    } else if (categoryParam) {
+      return `${categoryParam} T-Shirts`;
+    } else if (filterParam === 'new') {
+      return 'New Arrivals';
+    } else if (filterParam === 'sale') {
+      return 'Special Offers';
+    } else {
+      return 'All Products';
+    }
+  };
+
   const handleAddToCart = (product) => {
     console.log('Added to cart:', product);
     // Implement cart functionality
@@ -145,14 +193,15 @@ const Product = ({ searchQuery }) => {
     // Implement wishlist functionality
   };
 
-    return (
+  return (
     <ProductsContainer>
-      <ProductsTitle>
-        {categoryParam ? `${categoryParam} T-Shirts` : 
-         filterParam === 'new' ? 'New Arrivals' :
-         filterParam === 'sale' ? 'Special Offers' :
-         'All Products'}
-      </ProductsTitle>
+      <ProductsTitle>{getPageTitle()}</ProductsTitle>
+      
+      {weatherParam && (
+        <WeatherBadge>
+          <FaCloudSun /> Showing items suitable for {getPageTitle()}
+        </WeatherBadge>
+      )}
       
       <FiltersContainer>
         <FilterSelect 

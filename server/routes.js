@@ -14,7 +14,8 @@ import {
   register,
   login,
   getUserProfile,
-  updateUserProfile
+  updateUserProfile,
+  updateUserCity
 } from './controllers/authController.js';
 import { protect } from './middleware/authMiddleware.js';
 
@@ -29,6 +30,7 @@ router.post('/users/register', register);
 router.post('/users/login', login);
 router.get('/users/profile', protect, getUserProfile);
 router.put('/users/profile', protect, updateUserProfile);
+router.put('/users/city', protect, updateUserCity);
 
 // Cart routes
 router.post('/cart', addToCart);

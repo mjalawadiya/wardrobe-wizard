@@ -2,6 +2,112 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaShoppingCart, FaHeart, FaUser, FaSearch, FaBars, FaTimes, FaSignOutAlt } from 'react-icons/fa';
 import '../styles/components/navbar.css';
+import styled from 'styled-components';
+
+// Define styled components
+const NavMenu = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const NavItem = styled.li`
+  margin-bottom: 0.5rem;
+  width: 100%;
+`;
+
+const NavLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  color: #2c3e50;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: all 0.2s;
+  width: 100%;
+  
+  &:hover {
+    background-color: #f8f9fa;
+    color: #f39c12;
+  }
+`;
+
+const CartIcon = styled.div`
+  position: relative;
+  display: flex;
+`;
+
+const CartBadge = styled.span`
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #f39c12;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const LogoutButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  color: #e74c3c;
+  background: none;
+  border: none;
+  border-radius: 5px;
+  width: 100%;
+  text-align: left;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+`;
+
+// Additional styled components for the top-right navigation
+const TopNavLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2c3e50;
+  text-decoration: none;
+  padding: 0.5rem;
+  border-radius: 5px;
+  transition: all 0.2s;
+  
+  &:hover {
+    color: #f39c12;
+  }
+`;
+
+const TopLogoutButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2c3e50;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    color: #f39c12;
+  }
+`;
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -112,15 +218,15 @@ const Navbar = () => {
         {/* Right side - Logout Button */}
         <div className="navbar-right">
           {isLoggedIn ? (
-            <button className="nav-link logout-button" onClick={handleLogout}>
+            <TopLogoutButton onClick={handleLogout}>
               <FaSignOutAlt />
               Logout
-            </button>
+            </TopLogoutButton>
           ) : (
-            <Link to="/login" className="nav-link">
+            <TopNavLink to="/login">
               <FaUser />
               Login
-            </Link>
+            </TopNavLink>
           )}
         </div>
         
@@ -136,7 +242,7 @@ const Navbar = () => {
           <div className="nav-menu-header">
             {isLoggedIn && userData && (
               <div className="user-greeting">
-                Hello, {userData.username || 'User'}
+                Hello, {userData.username || userData.name || 'User'}
               </div>
             )}
           </div>
@@ -157,29 +263,60 @@ const Navbar = () => {
             </div>
           </form>
           
-          <div className="nav-links">
-            <Link to="/products" className="nav-link" onClick={closeMenu}>Products</Link>
+          <NavMenu>
+            <NavItem>
+              <NavLink to="/products">Products</NavLink>
+            </NavItem>
             
-            <Link to="/cart" className="nav-link" onClick={closeMenu}>
-              <FaShoppingCart />
-              Cart
-              {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
-            </Link>
-            
-            {isLoggedIn && (
+            {isLoggedIn ? (
               <>
-                <Link to="/wishlist" className="nav-link" onClick={closeMenu}>
-                  <FaHeart />
-                  Wishlist
-                </Link>
+                <NavItem>
+                  <NavLink to="/cart">
+                    <CartIcon>
+                      <FaShoppingCart />
+                      {cartCount > 0 && <CartBadge>{cartCount}</CartBadge>}
+                    </CartIcon>
+                    Cart
+                  </NavLink>
+                </NavItem>
                 
-                <Link to="/account" className="nav-link" onClick={closeMenu}>
-                  <FaUser />
-                  Account
-                </Link>
+                <NavItem>
+                  <NavLink to="/wishlist">
+                    <FaHeart />
+                    Wishlist
+                  </NavLink>
+                </NavItem>
+
+                <NavItem>
+                  <NavLink to="/profile">
+                    <FaUser />
+                    Profile
+                  </NavLink>
+                </NavItem>
+                
+                <NavItem>
+                  <LogoutButton onClick={handleLogout}>
+                    <FaSignOutAlt />
+                    Logout
+                  </LogoutButton>
+                </NavItem>
+              </>
+            ) : (
+              <>
+                <NavItem>
+                  <NavLink to="/login">
+                    <FaUser />
+                    Login
+                  </NavLink>
+                </NavItem>
+                <NavItem>
+                  <NavLink to="/register">
+                    Register
+                  </NavLink>
+                </NavItem>
               </>
             )}
-          </div>
+          </NavMenu>
         </div>
       </div>
     </nav>

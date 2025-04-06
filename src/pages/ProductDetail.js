@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
-import { FaHeart, FaShoppingCart, FaStar, FaStarHalfAlt, FaRegStar, FaArrowLeft } from 'react-icons/fa';
+import { FaHeart, FaShoppingCart, FaStar, FaStarHalfAlt, FaRegStar, FaArrowLeft, FaTshirt, FaCloudSun, FaSnowflake, FaSun, FaUmbrella, FaWind } from 'react-icons/fa';
 import { getTshirtImagePath } from '../services/productService.js';
 import '../styles/components/productDetail.css';
 import ImageLoader from '../components/ImageLoader.js';
@@ -100,6 +100,38 @@ const ProductMeta = styled.div`
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
+`;
+
+const MetaGroup = styled.div`
+  margin-bottom: 2rem;
+`;
+
+const MetaTitle = styled.h3`
+  font-size: 1.2rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-weight: 600;
+`;
+
+const WeatherSuitability = styled.div`
+  margin-top: 2rem;
+`;
+
+const WeatherTag = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: ${props => props.active ? '#e8f4fd' : '#f8f9fa'};
+  color: ${props => props.active ? '#3498db' : '#95a5a6'};
+  border-radius: 20px;
+  margin-right: 0.8rem;
+  margin-bottom: 0.8rem;
+  font-size: 0.9rem;
+  
+  svg {
+    color: ${props => props.active ? props.iconColor || '#f39c12' : '#95a5a6'};
+  }
 `;
 
 const MetaItem = styled.div`
@@ -507,6 +539,60 @@ const ProductDetail = () => {
     }
   };
 
+  // Define weather suitability for the product
+  const getWeatherSuitability = (product) => {
+    // Default suitability if product doesn't have it defined
+    if (!product || !product.weatherSuitability) {
+      // Example default assignment based on product properties
+      const defaultSuitability = {
+        hot: product.fabric?.toLowerCase().includes('cotton') || false,
+        moderate: true, // Most clothing is suitable for moderate weather
+        cold: product.fabric?.toLowerCase().includes('wool') || product.category?.toLowerCase().includes('winter') || false,
+        rain: product.waterproof || false,
+        snow: product.category?.toLowerCase().includes('winter') || false,
+        windy: !product.category?.toLowerCase().includes('loose') || true
+      };
+      return defaultSuitability;
+    }
+    return product.weatherSuitability;
+  };
+
+  // Get weather condition icon
+  const getWeatherIcon = (condition) => {
+    switch(condition) {
+      case 'hot':
+        return <FaSun />;
+      case 'cold':
+        return <FaSnowflake />;
+      case 'rain':
+        return <FaUmbrella />;
+      case 'snow':
+        return <FaSnowflake />;
+      case 'windy':
+        return <FaWind />;
+      default:
+        return <FaCloudSun />;
+    }
+  };
+
+  // Get icon color for weather condition
+  const getIconColor = (condition) => {
+    switch(condition) {
+      case 'hot':
+        return '#e74c3c';
+      case 'cold':
+        return '#3498db';
+      case 'rain':
+        return '#2980b9';
+      case 'snow':
+        return '#7f8c8d';
+      case 'windy':
+        return '#95a5a6';
+      default:
+        return '#f39c12';
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -603,35 +689,57 @@ const ProductDetail = () => {
             </ProductDescription>
             
             <ProductMeta>
-              <MetaItem>
-                <MetaLabel>Category</MetaLabel>
-                <MetaValue>{product['Category'] || 'T-Shirt'}</MetaValue>
-              </MetaItem>
+              <MetaGroup>
+                <MetaTitle>Product Details</MetaTitle>
+                <MetaItem>
+                  <MetaLabel>Category</MetaLabel>
+                  <MetaValue>{product['Category'] || 'T-Shirt'}</MetaValue>
+                </MetaItem>
+                
+                <MetaItem>
+                  <MetaLabel>Color</MetaLabel>
+                  <MetaValue>{product['Color'] || 'Mixed'}</MetaValue>
+                </MetaItem>
+                
+                <MetaItem>
+                  <MetaLabel>Fabric</MetaLabel>
+                  <MetaValue>{product['Fabric'] || 'Cotton'}</MetaValue>
+                </MetaItem>
+                
+                <MetaItem>
+                  <MetaLabel>Pattern</MetaLabel>
+                  <MetaValue>{product['Pattern'] || 'Solid'}</MetaValue>
+                </MetaItem>
+                
+                <MetaItem>
+                  <MetaLabel>Fit Type</MetaLabel>
+                  <MetaValue>{product['Fit Type'] || 'Regular Fit'}</MetaValue>
+                </MetaItem>
+                
+                <MetaItem>
+                  <MetaLabel>Occasion</MetaLabel>
+                  <MetaValue>{product['Occasion'] || 'Casual'}</MetaValue>
+                </MetaItem>
+              </MetaGroup>
               
-              <MetaItem>
-                <MetaLabel>Color</MetaLabel>
-                <MetaValue>{product['Color'] || 'Mixed'}</MetaValue>
-              </MetaItem>
-              
-              <MetaItem>
-                <MetaLabel>Fabric</MetaLabel>
-                <MetaValue>{product['Fabric'] || 'Cotton'}</MetaValue>
-              </MetaItem>
-              
-              <MetaItem>
-                <MetaLabel>Pattern</MetaLabel>
-                <MetaValue>{product['Pattern'] || 'Solid'}</MetaValue>
-              </MetaItem>
-              
-              <MetaItem>
-                <MetaLabel>Fit Type</MetaLabel>
-                <MetaValue>{product['Fit Type'] || 'Regular Fit'}</MetaValue>
-              </MetaItem>
-              
-              <MetaItem>
-                <MetaLabel>Occasion</MetaLabel>
-                <MetaValue>{product['Occasion'] || 'Casual'}</MetaValue>
-              </MetaItem>
+              <WeatherSuitability>
+                <MetaTitle>
+                  <FaCloudSun style={{ marginRight: '8px', color: '#f39c12' }} />
+                  Weather Suitability
+                </MetaTitle>
+                <div>
+                  {Object.entries(getWeatherSuitability(product)).map(([condition, suitable]) => (
+                    <WeatherTag 
+                      key={condition} 
+                      active={suitable}
+                      iconColor={getIconColor(condition)}
+                    >
+                      {getWeatherIcon(condition)}
+                      {condition.charAt(0).toUpperCase() + condition.slice(1)} Weather
+                    </WeatherTag>
+                  ))}
+                </div>
+              </WeatherSuitability>
             </ProductMeta>
             
             <SizeSelector>

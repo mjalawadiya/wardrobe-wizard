@@ -17,23 +17,21 @@
   position: relative;
   height: 50px;
   width: 100%;
+  padding: 0 20px;
 }
 
 .navbar-left, .navbar-right {
-  position: absolute;
   display: flex;
   align-items: center;
   z-index: 5;
 }
 
 .navbar-left {
-  left: 0;
-  margin-left: 20px;
+  left: 20px;
 }
 
 .navbar-right {
-  right: 0;
-  margin-right: 20px;
+  right: 20px;
 }
 
 .navbar-center {
@@ -106,6 +104,7 @@
   display: flex;
   align-items: center;
   gap: 0.3rem;
+  width: 100%;
 }
 
 .nav-link:hover {
@@ -231,12 +230,8 @@
     font-size: 0.9rem;
   }
   
-  .navbar-left {
-    margin-left: 15px;
-  }
-  
-  .navbar-right {
-    margin-right: 15px;
+  .nav-container {
+    padding: 0 15px;
   }
   
   .nav-menu {

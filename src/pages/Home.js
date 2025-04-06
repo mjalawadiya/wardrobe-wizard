@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import Carousel from '../components/Carousel.js';
 import ProductCard from '../components/ProductCard.js';
+import WeatherRecommendations from '../components/WeatherRecommendations.js';
 import { FaArrowRight, FaTshirt, FaStar } from 'react-icons/fa';
 import { generateRandomTshirts } from '../services/productService.js';
 import ImageLoader from '../components/ImageLoader.js';
@@ -211,6 +212,40 @@ const Home = () => {
   const [topRatedProducts, setTopRatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
+  const [userData, setUserData] = useState(null);
+
+  // Get user data and set up event listeners for login/logout
+  useEffect(() => {
+    const checkUserData = () => {
+      const userDataString = localStorage.getItem('userData');
+      if (userDataString) {
+        try {
+          const parsedUserData = JSON.parse(userDataString);
+          setUserData(parsedUserData);
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+          setUserData(null);
+        }
+      } else {
+        setUserData(null);
+      }
+    };
+
+    // Check on initial render
+    checkUserData();
+
+    // Set up event listeners for login/logout
+    window.addEventListener('userLogin', checkUserData);
+    window.addEventListener('userLogout', checkUserData);
+    window.addEventListener('storage', checkUserData);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('userLogin', checkUserData);
+      window.removeEventListener('userLogout', checkUserData);
+      window.removeEventListener('storage', checkUserData);
+    };
+  }, []);
 
   // Fetch products
   useEffect(() => {
@@ -278,128 +313,121 @@ const Home = () => {
   };
 
   return (
-    <>
+    <HomeContainer>
+      <HomeTitle>Welcome to Wardrobe Wizard</HomeTitle>
+      <HomeSubtitle>
+        Discover the perfect outfit for every occasion. Quality clothing, curated just for you.
+      </HomeSubtitle>
+
+      {/* Weather recommendations for logged-in users only */}
+      {userData ? <WeatherRecommendations /> : null}
+      
       <Carousel />
       
-      <HomeContainer>
-        <HomeTitle>Welcome to Wardrobe Wizard</HomeTitle>
-        <HomeSubtitle>
-          Discover the perfect tees for every occasion. Our collection features premium quality
-          t-shirts in various styles, colors, and fits.
-        </HomeSubtitle>
+      {/* Featured Products Section */}
+      <FeaturedSection>
+        <SectionHeader>
+          <SectionTitle>
+            <FaStar /> Featured Products
+          </SectionTitle>
+          <ViewAllLink to="/products">
+            View All <FaArrowRight />
+          </ViewAllLink>
+        </SectionHeader>
         
-        {/* Featured Products Section */}
-        <FeaturedSection>
-          <SectionHeader>
-            <SectionTitle>
-              <FaTshirt /> Featured Products
-            </SectionTitle>
-            <ViewAllLink to="/products">
-              View All <FaArrowRight />
-            </ViewAllLink>
-          </SectionHeader>
-          
-          {loading ? (
-            <LoadingMessage>Loading products...</LoadingMessage>
-          ) : (
-            <ProductGrid>
-              {featuredProducts.map(product => (
-                <ProductCard 
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  rating={product.rating}
-                  image={product.image}
-                />
-              ))}
-            </ProductGrid>
-          )}
-        </FeaturedSection>
-        
-        {/* Shop By Category Section */}
-        <CategoriesSection>
-          <SectionHeader>
-            <SectionTitle>Shop By Fit</SectionTitle>
-            <ViewAllLink to="/products">
-              View All <FaArrowRight />
-            </ViewAllLink>
-          </SectionHeader>
-          
-          <CategoryGrid>
-            {categories.map((category, index) => (
-              <CategoryCard key={index}>
-                <CategoryImage 
-                  src={getCategoryImagePath(category.id)} 
-                  alt={category.name} 
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'center'
-                  }}
-                  fallbackSrc="/images/image1.jpeg"
-                  onError={() => {
-                    console.error('Category image failed to load:', category.id);
-                  }}
-                />
-                <CategoryOverlay>
-                  <CategoryName>{category.name}</CategoryName>
-                </CategoryOverlay>
-                <Link to={`/products?category=${category.name}`} />
-              </CategoryCard>
+        {loading ? (
+          <LoadingMessage>Loading products...</LoadingMessage>
+        ) : (
+          <ProductGrid>
+            {featuredProducts.map(product => (
+              <ProductCard key={product.id} product={product} />
             ))}
-          </CategoryGrid>
-        </CategoriesSection>
+          </ProductGrid>
+        )}
+      </FeaturedSection>
+      
+      {/* Shop By Category Section */}
+      <CategoriesSection>
+        <SectionHeader>
+          <SectionTitle>Shop By Fit</SectionTitle>
+          <ViewAllLink to="/products">
+            View All <FaArrowRight />
+          </ViewAllLink>
+        </SectionHeader>
         
-        {/* Top Rated Products Section */}
-        <FeaturedSection>
-          <SectionHeader>
-            <SectionTitle>
-              <FaStar /> Top Rated
-            </SectionTitle>
-            <ViewAllLink to="/products">
-              View All <FaArrowRight />
-            </ViewAllLink>
-          </SectionHeader>
-          
-          {loading ? (
-            <LoadingMessage>Loading products...</LoadingMessage>
-          ) : (
-            <ProductGrid>
-              {topRatedProducts.map(product => (
-                <ProductCard 
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  rating={product.rating}
-                  image={product.image}
-                />
-              ))}
-            </ProductGrid>
-          )}
-        </FeaturedSection>
+        <CategoryGrid>
+          {categories.map((category, index) => (
+            <CategoryCard key={index}>
+              <CategoryImage 
+                src={getCategoryImagePath(category.id)} 
+                alt={category.name} 
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center'
+                }}
+                fallbackSrc="/images/image1.jpeg"
+                onError={() => {
+                  console.error('Category image failed to load:', category.id);
+                }}
+              />
+              <CategoryOverlay>
+                <CategoryName>{category.name}</CategoryName>
+              </CategoryOverlay>
+              <Link to={`/products?category=${category.name}`} />
+            </CategoryCard>
+          ))}
+        </CategoryGrid>
+      </CategoriesSection>
+      
+      {/* Top Rated Products Section */}
+      <FeaturedSection>
+        <SectionHeader>
+          <SectionTitle>
+            <FaStar /> Top Rated
+          </SectionTitle>
+          <ViewAllLink to="/products">
+            View All <FaArrowRight />
+          </ViewAllLink>
+        </SectionHeader>
         
-        {/* Newsletter Section */}
-        <Newsletter>
-          <NewsletterTitle>Join Our Newsletter</NewsletterTitle>
-          <NewsletterText>
-            Subscribe to our newsletter to receive updates on new arrivals, special offers and other discount information.
-          </NewsletterText>
-          <NewsletterForm onSubmit={handleNewsletterSubmit}>
-            <NewsletterInput 
-              type="email" 
-              placeholder="Your email address" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <NewsletterButton type="submit">Subscribe</NewsletterButton>
-          </NewsletterForm>
-        </Newsletter>
-      </HomeContainer>
-    </>
+        {loading ? (
+          <LoadingMessage>Loading products...</LoadingMessage>
+        ) : (
+          <ProductGrid>
+            {topRatedProducts.map(product => (
+              <ProductCard 
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                price={product.price}
+                rating={product.rating}
+                image={product.image}
+              />
+            ))}
+          </ProductGrid>
+        )}
+      </FeaturedSection>
+      
+      {/* Newsletter Section */}
+      <Newsletter>
+        <NewsletterTitle>Join Our Newsletter</NewsletterTitle>
+        <NewsletterText>
+          Subscribe to our newsletter to receive updates on new arrivals, special offers and other discount information.
+        </NewsletterText>
+        <NewsletterForm onSubmit={handleNewsletterSubmit}>
+          <NewsletterInput 
+            type="email" 
+            placeholder="Your email address" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <NewsletterButton type="submit">Subscribe</NewsletterButton>
+        </NewsletterForm>
+      </Newsletter>
+    </HomeContainer>
   );
 };
 
