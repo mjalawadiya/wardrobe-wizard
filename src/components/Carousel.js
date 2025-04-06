@@ -6,10 +6,15 @@ import ImageLoader from './ImageLoader.js';
 
 const CarouselContainer = styled.div`
   position: relative;
-  width: 100%;
+  width: 100vw;
   height: 500px;
   overflow: hidden;
-  margin-bottom: 2rem;
+  margin: 0;
+  padding: 0;
+  max-width: 100vw;
+  left: calc(-50vw + 50%);
+  right: calc(-50vw + 50%);
+  box-sizing: border-box;
   
   @media (max-width: 768px) {
     height: 300px;
@@ -19,14 +24,17 @@ const CarouselContainer = styled.div`
 const SlideWrapper = styled.div`
   display: flex;
   height: 100%;
+  width: 100vw;
   transition: transform 0.5s ease;
   transform: translateX(-${props => props.currentSlide * 100}%);
 `;
 
 const Slide = styled.div`
   min-width: 100%;
+  width: 100vw;
   height: 100%;
   position: relative;
+  overflow: hidden;
 `;
 
 const SlideImage = styled(ImageLoader)`
@@ -42,7 +50,7 @@ const SlideContent = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0) 100%);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0.1) 70%, rgba(0, 0, 0, 0) 100%);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -166,7 +174,7 @@ const Carousel = () => {
   const slides = [
     {
       id: 1,
-      image: '/images/carousel/slide1.jpg',
+      image: '/images/carousel/slide3.png',
       title: 'Summer Collection 2023',
       description: 'Beat the heat with our premium tees designed for maximum comfort and style.',
       buttonText: 'Shop Now',
@@ -174,7 +182,7 @@ const Carousel = () => {
     },
     {
       id: 2,
-      image: '/images/carousel/slide2.jpg',
+      image: '/images/carousel/slide2.png',
       title: 'New Arrivals',
       description: 'Check out the latest additions to our collection, crafted with premium materials.',
       buttonText: 'Explore',
@@ -182,7 +190,7 @@ const Carousel = () => {
     },
     {
       id: 3,
-      image: '/images/carousel/slide3.jpg',
+      image: '/images/carousel/slide1.png',
       title: 'Special Offers',
       description: 'Limited time discounts on selected items. Don\'t miss out!',
       buttonText: 'View Deals',

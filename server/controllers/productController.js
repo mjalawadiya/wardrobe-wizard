@@ -1,5 +1,7 @@
 import Product from '../models/Product.js';
 import User from '../models/User.js';
+import Cart from '../models/Cart.js';
+import Wishlist from '../models/Wishlist.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -81,27 +83,44 @@ export const addToCart = async (req, res) => {
       return res.status(400).json({ message: 'User ID and Product ID are required' });
     }
     
+    // Check if user exists
     const user = await User.findById(userId);
-    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    // Check if product already in cart
-    const existingCartItem = user.cart.find(item => item.productId === productId);
+    // Check if product exists - convert to string to ensure proper comparison
+    const products = readTshirtData();
+    const stringProductId = productId.toString();
+    const product = products.find(p => p['Product ID'].toString() === stringProductId);
     
-    if (existingCartItem) {
-      // Update quantity
-      existingCartItem.quantity += quantity;
-    } else {
-      // Add new item
-      user.cart.push({ productId, quantity });
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
     }
     
-    await user.save();
+    // Check if product already in cart
+    let cartItem = await Cart.findOne({ userId, productId: stringProductId });
     
-    res.status(200).json({ message: 'Product added to cart', cart: user.cart });
+    if (cartItem) {
+      // Update quantity
+      cartItem.quantity += parseInt(quantity, 10);
+      await cartItem.save();
+    } else {
+      // Create new cart item
+      cartItem = new Cart({
+        userId,
+        productId: stringProductId,
+        quantity: parseInt(quantity, 10)
+      });
+      await cartItem.save();
+    }
+    
+    res.status(200).json({ 
+      message: 'Product added to cart', 
+      cartItem
+    });
   } catch (error) {
+    console.error('Cart Error:', error);
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
@@ -115,18 +134,20 @@ export const removeFromCart = async (req, res) => {
       return res.status(400).json({ message: 'User ID and Product ID are required' });
     }
     
+    // Check if user exists
     const user = await User.findById(userId);
-    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    // Remove product from cart
-    user.cart = user.cart.filter(item => item.productId !== productId);
+    // Remove item from cart
+    const result = await Cart.deleteOne({ userId, productId });
     
-    await user.save();
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Item not found in cart' });
+    }
     
-    res.status(200).json({ message: 'Product removed from cart', cart: user.cart });
+    res.status(200).json({ message: 'Product removed from cart' });
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
@@ -141,29 +162,36 @@ export const updateCartItemQuantity = async (req, res) => {
       return res.status(400).json({ message: 'User ID, Product ID, and quantity are required' });
     }
     
+    // Check if user exists
     const user = await User.findById(userId);
-    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    const cartItem = user.cart.find(item => item.productId === productId);
+    // Convert quantity to integer
+    const newQuantity = parseInt(quantity, 10);
     
-    if (!cartItem) {
-      return res.status(404).json({ message: 'Product not found in cart' });
+    // If quantity is 0 or less, remove item from cart
+    if (newQuantity <= 0) {
+      await Cart.deleteOne({ userId, productId });
+      return res.status(200).json({ message: 'Item removed from cart' });
     }
     
     // Update quantity
-    cartItem.quantity = quantity;
+    const cartItem = await Cart.findOneAndUpdate(
+      { userId, productId },
+      { quantity: newQuantity },
+      { new: true }
+    );
     
-    // If quantity is 0 or less, remove item from cart
-    if (quantity <= 0) {
-      user.cart = user.cart.filter(item => item.productId !== productId);
+    if (!cartItem) {
+      return res.status(404).json({ message: 'Item not found in cart' });
     }
     
-    await user.save();
-    
-    res.status(200).json({ message: 'Cart updated', cart: user.cart });
+    res.status(200).json({ 
+      message: 'Cart updated', 
+      cartItem 
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
@@ -178,24 +206,42 @@ export const addToWishlist = async (req, res) => {
       return res.status(400).json({ message: 'User ID and Product ID are required' });
     }
     
+    // Check if user exists
     const user = await User.findById(userId);
-    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     
+    // Check if product exists - convert to string to ensure proper comparison
+    const products = readTshirtData();
+    const stringProductId = productId.toString();
+    const product = products.find(p => p['Product ID'].toString() === stringProductId);
+    
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    
     // Check if product already in wishlist
-    if (user.wishlist.includes(productId)) {
+    const existingItem = await Wishlist.findOne({ userId, productId: stringProductId });
+    
+    if (existingItem) {
       return res.status(400).json({ message: 'Product already in wishlist' });
     }
     
-    // Add to wishlist
-    user.wishlist.push(productId);
+    // Create new wishlist item
+    const wishlistItem = new Wishlist({
+      userId,
+      productId: stringProductId
+    });
     
-    await user.save();
+    await wishlistItem.save();
     
-    res.status(200).json({ message: 'Product added to wishlist', wishlist: user.wishlist });
+    res.status(200).json({ 
+      message: 'Product added to wishlist', 
+      wishlistItem 
+    });
   } catch (error) {
+    console.error('Wishlist Error:', error);
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
@@ -209,18 +255,20 @@ export const removeFromWishlist = async (req, res) => {
       return res.status(400).json({ message: 'User ID and Product ID are required' });
     }
     
+    // Check if user exists
     const user = await User.findById(userId);
-    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     
     // Remove from wishlist
-    user.wishlist = user.wishlist.filter(id => id !== productId);
+    const result = await Wishlist.deleteOne({ userId, productId });
     
-    await user.save();
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Item not found in wishlist' });
+    }
     
-    res.status(200).json({ message: 'Product removed from wishlist', wishlist: user.wishlist });
+    res.status(200).json({ message: 'Product removed from wishlist' });
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
@@ -231,20 +279,28 @@ export const getUserCart = async (req, res) => {
   try {
     const userId = req.params.userId;
     
+    // Check if user exists
     const user = await User.findById(userId);
-    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+    
+    // Get user's cart items
+    const cartItems = await Cart.find({ userId }).sort({ dateAdded: -1 });
     
     // Get all products from CSV
     const allProducts = readTshirtData();
     
     // Map cart items with product details
-    const cartWithDetails = user.cart.map(cartItem => {
+    const cartWithDetails = cartItems.map(cartItem => {
       const productDetails = allProducts.find(p => p['Product ID'] === cartItem.productId);
+      
       return {
-        ...cartItem.toObject(),
+        _id: cartItem._id,
+        userId: cartItem.userId,
+        productId: cartItem.productId,
+        quantity: cartItem.quantity,
+        dateAdded: cartItem.dateAdded,
         productDetails: productDetails || { message: 'Product details not found' }
       };
     });
@@ -260,19 +316,29 @@ export const getUserWishlist = async (req, res) => {
   try {
     const userId = req.params.userId;
     
+    // Check if user exists
     const user = await User.findById(userId);
-    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+    
+    // Get user's wishlist items
+    const wishlistItems = await Wishlist.find({ userId }).sort({ dateAdded: -1 });
     
     // Get all products from CSV
     const allProducts = readTshirtData();
     
     // Map wishlist items with product details
-    const wishlistWithDetails = user.wishlist.map(productId => {
-      const productDetails = allProducts.find(p => p['Product ID'] === productId);
-      return productDetails || { message: 'Product details not found', productId };
+    const wishlistWithDetails = wishlistItems.map(item => {
+      const productDetails = allProducts.find(p => p['Product ID'] === item.productId);
+      
+      return {
+        _id: item._id,
+        userId: item.userId,
+        productId: item.productId,
+        dateAdded: item.dateAdded,
+        productDetails: productDetails || { message: 'Product details not found' }
+      };
     });
     
     res.json(wishlistWithDetails);

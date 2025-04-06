@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaCartPlus, FaHeart, FaStar } from 'react-icons/fa';
 import ImageLoader from './ImageLoader.js';
+import axios from 'axios';
 import '../styles/components/productCard.css';
 
 // Helper function to preload an image
@@ -15,10 +16,24 @@ const preloadImage = (src) => {
 };
 
 const ProductCard = (props) => {
-  let { id, name, price, rating, image, discount, isNew, category, addToCart, addToWishlist, product } = props;
+  let { id, name, price, rating, image, discount, isNew, category, product } = props;
+  const [userData, setUserData] = useState(null);
   
   // State to track if we should preload the detail image
   const [isHovered, setIsHovered] = useState(false);
+  
+  useEffect(() => {
+    // Get user data from localStorage
+    const userDataString = localStorage.getItem('userData');
+    if (userDataString) {
+      try {
+        const parsedUserData = JSON.parse(userDataString);
+        setUserData(parsedUserData);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+  }, []);
   
   // Calculate discount percentage
   const hasDiscount = discount && discount < price;
@@ -71,15 +86,94 @@ const ProductCard = (props) => {
     setIsHovered(false);
   };
 
-  const handleAddToCart = () => {
-    if (addToCart) {
-      addToCart({ id, name, price, image });
+  const handleAddToCart = async () => {
+    try {
+      if (!userData) {
+        alert('Please log in to add items to your cart');
+        return;
+      }
+      
+      const productIdToUse = id ? id.toString() : '';
+      console.log('Adding to cart:', {
+        userId: userData._id,
+        productId: productIdToUse,
+        quantity: 1
+      });
+      
+      const response = await axios.post('/api/cart', {
+        userId: userData._id,
+        productId: productIdToUse,
+        quantity: 1
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      console.log('Cart API response:', response.data);
+      
+      // Also update local cart storage for navbar display
+      const currentCart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const existingItemIndex = currentCart.findIndex(item => item.productId === productIdToUse);
+      
+      if (existingItemIndex !== -1) {
+        // If item already in cart, increment quantity
+        currentCart[existingItemIndex].quantity += 1;
+      } else {
+        // Otherwise add new item
+        currentCart.push({ productId: productIdToUse, quantity: 1 });
+      }
+      
+      localStorage.setItem('cart', JSON.stringify(currentCart));
+      
+      // Trigger storage event
+      window.dispatchEvent(new Event('storage'));
+      
+      alert('Product added to cart!');
+    } catch (err) {
+      console.error('Error adding to cart:', err);
+      if (err.response) {
+        console.error('Error response:', err.response.data);
+      }
+      alert('Failed to add item to cart. Please try again.');
     }
   };
 
-  const handleAddToWishlist = () => {
-    if (addToWishlist) {
-      addToWishlist({ id, name, price, image });
+  const handleAddToWishlist = async () => {
+    try {
+      if (!userData) {
+        alert('Please log in to add items to your wishlist');
+        return;
+      }
+      
+      const productIdToUse = id ? id.toString() : '';
+      console.log('Adding to wishlist:', {
+        userId: userData._id,
+        productId: productIdToUse
+      });
+      
+      const response = await axios.post('/api/wishlist', {
+        userId: userData._id,
+        productId: productIdToUse
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      console.log('Wishlist API response:', response.data);
+      
+      alert('Product added to wishlist!');
+    } catch (err) {
+      if (err.response && err.response.status === 400 && err.response.data.message.includes('already in wishlist')) {
+        alert('This product is already in your wishlist!');
+      } else {
+        console.error('Error adding to wishlist:', err);
+        if (err.response) {
+          console.error('Error response:', err.response.data);
+        }
+        alert('Failed to add item to wishlist. Please try again.');
+      }
     }
   };
 

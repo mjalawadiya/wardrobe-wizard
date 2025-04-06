@@ -422,10 +422,48 @@ const ProductDetail = () => {
         return;
       }
       
-      // Add to cart logic
+      const productIdToUse = (product['Product ID'] || product.id).toString();
+      console.log('Adding to cart from detail page:', {
+        userId: user._id,
+        productId: productIdToUse,
+        quantity: quantity
+      });
+      
+      const response = await axios.post('/api/cart', {
+        userId: user._id,
+        productId: productIdToUse,
+        quantity: quantity
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      console.log('Cart API response:', response.data);
+      
+      // Also update local cart storage for navbar display
+      const currentCart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const existingItemIndex = currentCart.findIndex(item => item.productId === productIdToUse);
+      
+      if (existingItemIndex !== -1) {
+        // If item already in cart, update quantity
+        currentCart[existingItemIndex].quantity += quantity;
+      } else {
+        // Otherwise add new item
+        currentCart.push({ productId: productIdToUse, quantity });
+      }
+      
+      localStorage.setItem('cart', JSON.stringify(currentCart));
+      
+      // Trigger storage event
+      window.dispatchEvent(new Event('storage'));
+      
       alert(`Added ${product['Product Name'] || product.name} to cart!`);
     } catch (err) {
       console.error('Error adding to cart:', err);
+      if (err.response) {
+        console.error('Error response:', err.response.data);
+      }
       setError('Failed to add to cart. Please try again.');
     }
   };
@@ -438,11 +476,34 @@ const ProductDetail = () => {
         return;
       }
       
-      // Add to wishlist logic
+      const productIdToUse = (product['Product ID'] || product.id).toString();
+      console.log('Adding to wishlist from detail page:', {
+        userId: user._id,
+        productId: productIdToUse
+      });
+      
+      const response = await axios.post('/api/wishlist', {
+        userId: user._id,
+        productId: productIdToUse
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      console.log('Wishlist API response:', response.data);
+      
       alert(`Added ${product['Product Name'] || product.name} to wishlist!`);
     } catch (err) {
-      console.error('Error adding to wishlist:', err);
-      setError('Failed to add to wishlist. Please try again.');
+      if (err.response && err.response.status === 400 && err.response.data.message.includes('already in wishlist')) {
+        alert('This product is already in your wishlist!');
+      } else {
+        console.error('Error adding to wishlist:', err);
+        if (err.response) {
+          console.error('Error response:', err.response.data);
+        }
+        setError('Failed to add to wishlist. Please try again.');
+      }
     }
   };
 

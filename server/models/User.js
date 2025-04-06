@@ -20,25 +20,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: 6
-  },
-  cart: [
-    {
-      productId: {
-        type: String,
-        required: true
-      },
-      quantity: {
-        type: Number,
-        required: true,
-        default: 1
-      }
-    }
-  ],
-  wishlist: [
-    {
-      type: String
-    }
-  ]
+  }
 }, {
   timestamps: true
 });
