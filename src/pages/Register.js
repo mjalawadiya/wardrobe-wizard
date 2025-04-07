@@ -140,7 +140,7 @@ const Register = () => {
         <div className="form-group">
           <label htmlFor="username" className="form-label">Username</label>
           <div className="input-wrapper">
-            <span className="input-icon">
+          <span className="input-icon">
               <FaUser />
             </span>
             <input
@@ -155,6 +155,7 @@ const Register = () => {
               minLength="3"
             />
           </div>
+          
           {formData.username && !validations.username && (
             <span className="validation-message invalid">
               Username must be at least 3 characters

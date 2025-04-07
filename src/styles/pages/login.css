@@ -38,6 +38,8 @@
   border-radius: 5px;
   overflow: hidden;
   transition: all 0.3s ease;
+  width: 100%;
+  position: relative;
 }
 
 .input-wrapper:focus-within {
@@ -49,10 +51,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 1rem;
+  width: 50px;
+  min-width: 50px;
+  height: 100%;
   background-color: #f8f9fa;
   color: #7f8c8d;
-  height: 100%;
+  border-right: 1px solid #eee;
 }
 
 .form-input {
@@ -61,6 +65,7 @@
   border: none;
   outline: none;
   font-size: 1rem;
+  background-color: white;
 }
 
 .submit-button {
