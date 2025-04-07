@@ -16,7 +16,25 @@ body {
   font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f8f9fa;
+  background: linear-gradient(to bottom, 
+    #ffffff 0%, 
+    #ffffff 5%,
+    #ffffff 15%, 
+    #e7f5ff 20%,
+    #dce9f9 25%, 
+    #e3eff8 30%,
+    #ecf4f9 35%,
+    #f5f9fc 40%,
+    #ffe8cc 45%, 
+    #ffecda 50%,
+    #ffefdf 55%,
+    #ffd9ad 65%,
+    #ffc988 75%,
+    #ffb567 85%,
+    #ffaa4c 95%,
+    #f39c12 100%);
+  background-attachment: fixed;
+  background-size: 100% 100vh;
   color: #2c3e50;
   line-height: 1.6;
   overflow-x: hidden; /* Prevent horizontal scrolling */

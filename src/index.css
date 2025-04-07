@@ -8,6 +8,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   max-width: 100vw;
+  background: linear-gradient(to bottom, #ffffff, #f8f9fa, #f2f2f2, #fcf8f2);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: #2c3e50;
+}
+
+html {
+  height: 100%;
 }
 
 #root {

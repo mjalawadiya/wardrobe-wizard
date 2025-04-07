@@ -11,10 +11,10 @@ const CarouselContainer = styled.div`
   overflow: hidden;
   margin: 0;
   padding: 0;
-  max-width: 100vw;
-  left: calc(-50vw + 50%);
-  right: calc(-50vw + 50%);
   box-sizing: border-box;
+  background-color: #000;
+  left: 50%;
+  transform: translateX(-50%);
   
   @media (max-width: 768px) {
     height: 300px;
@@ -24,14 +24,14 @@ const CarouselContainer = styled.div`
 const SlideWrapper = styled.div`
   display: flex;
   height: 100%;
-  width: 100vw;
+  width: 100%;
   transition: transform 0.5s ease;
   transform: translateX(-${props => props.currentSlide * 100}%);
 `;
 
 const Slide = styled.div`
   min-width: 100%;
-  width: 100vw;
+  width: 100%;
   height: 100%;
   position: relative;
   overflow: hidden;
@@ -41,7 +41,11 @@ const SlideImage = styled(ImageLoader)`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 10%;
+  margin: 0;
+  padding: 0;
+  display: block;
+  transform: scale(1.3);
 `;
 
 const SlideContent = styled.div`
@@ -175,7 +179,7 @@ const Carousel = () => {
     {
       id: 1,
       image: '/images/carousel/slide3.png',
-      title: 'Summer Collection 2023',
+      title: 'Summer Collection 2025',
       description: 'Beat the heat with our premium tees designed for maximum comfort and style.',
       buttonText: 'Shop Now',
       link: '/products?category=summer'
@@ -248,7 +252,6 @@ const Carousel = () => {
               src={getImageSrc(slide.image)} 
               alt={slide.title}
               fallbackSrc={`https://via.placeholder.com/1600x800/3498db/ffffff?text=Wardrobe+Wizard+${index + 1}`}
-              style={{ objectFit: 'cover', objectPosition: 'center' }}
             />
             <SlideContent>
               <SlideTitle>{slide.title}</SlideTitle>
