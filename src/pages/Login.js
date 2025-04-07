@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaEnvelope, FaLock, FaSignInAlt } from 'react-icons/fa';
+import { FaSignInAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
 import '../styles/pages/login.css';
 
@@ -10,6 +10,7 @@ const Login = () => {
     password: ''
   });
   
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -32,6 +33,10 @@ const Login = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleSubmit = async (e) => {
@@ -100,31 +105,23 @@ const Login = () => {
       <form className="login-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="email" className="form-label">Email</label>
-          <div className="input-wrapper">
-            <span className="input-icon">
-              <FaEnvelope />
-            </span>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className="form-input"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              required
-            />
-          </div>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            className="form-input"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+            required
+          />
         </div>
         
         <div className="form-group">
           <label htmlFor="password" className="form-label">Password</label>
-          <div className="input-wrapper">
-            <span className="input-icon">
-              <FaLock />
-            </span>
+          <div className="password-input-wrapper">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="password"
               name="password"
               className="form-input"
@@ -133,6 +130,14 @@ const Login = () => {
               placeholder="Enter your password"
               required
             />
+            <button 
+              type="button" 
+              className="password-toggle-btn"
+              onClick={togglePasswordVisibility}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
         </div>
         

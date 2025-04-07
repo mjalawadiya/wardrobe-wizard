@@ -131,6 +131,16 @@ const CategoryName = styled.h3`
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 `;
 
+const CategoryLink = styled(Link)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  text-decoration: none;
+`;
+
 const Newsletter = styled.section`
   background-color: #f8f9fa;
   border-radius: 10px;
@@ -308,13 +318,13 @@ const Home = () => {
         
         // Use random tshirts for featured products
         const shuffled = [...allTshirts].sort(() => 0.5 - Math.random());
-        setFeaturedProducts(shuffled.slice(0, 4));
+        setFeaturedProducts(shuffled.slice(0, 3));
         
         // Sort by rating for top rated products
         const sorted = [...allTshirts].sort((a, b) => 
           parseFloat(b.rating) - parseFloat(a.rating)
         );
-        setTopRatedProducts(sorted.slice(0, 4));
+        setTopRatedProducts(sorted.slice(0, 3));
         
         setLoading(false);
       } catch (error) {
@@ -450,7 +460,7 @@ const Home = () => {
               <CategoryOverlay>
                 <CategoryName>{category.name}</CategoryName>
               </CategoryOverlay>
-              <Link to={`/products?category=${category.name}`} />
+              <CategoryLink to={`/products?fit=${category.name.toLowerCase()}`} />
             </CategoryCard>
           ))}
         </CategoryGrid>

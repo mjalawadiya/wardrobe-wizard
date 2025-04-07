@@ -54,7 +54,7 @@ const WeatherRecommendations = () => {
     if (weather) {
       const mappedCondition = mapWeatherToCondition(weather);
       setWeatherCondition(mappedCondition);
-      const products = getProductsByWeatherCondition(mappedCondition, 5);
+      const products = getProductsByWeatherCondition(mappedCondition, 8);
       setRecommendations(products);
     }
   }, [weather]);

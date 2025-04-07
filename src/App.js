@@ -16,6 +16,9 @@ import AuthGuard from './components/AuthGuard.js';
 import UserProfile from './components/UserProfile.js';
 import AboutPage from './pages/AboutPage.js';
 import TermsPage from './pages/TermsPage.js';
+import ScrollToTop from './components/ScrollToTop.js';
+import OrderConfirmed from './pages/OrderConfirmed.js';
+import UnableToPlaceOrder from './pages/UnableToPlaceOrder.js';
 import './App.css';
 
 // Custom route component to handle weather-based product routes
@@ -36,6 +39,7 @@ const WeatherProtectedRoute = ({ children }) => {
 function App() {
   return (
     <div className="App">
+      <ScrollToTop />
       <Navbar />
       <main className="main-content">
         <Routes>
@@ -71,6 +75,8 @@ function App() {
           } />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/order-confirmed" element={<OrderConfirmed />} />
+          <Route path="/unable-to-place-order" element={<UnableToPlaceOrder />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

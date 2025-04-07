@@ -1,0 +1,99 @@
+.order-confirmed-container {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 2rem;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.success-icon {
+  font-size: 5rem;
+  color: #2ecc71;
+  margin-bottom: 1rem;
+  animation: scaleIn 0.5s ease-out;
+}
+
+.order-confirmed-container h1 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+}
+
+.success-message {
+  color: #7f8c8d;
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.order-info {
+  background-color: #f8f9fa;
+  padding: 2rem;
+  border-radius: 8px;
+  margin: 2rem 0;
+}
+
+.order-info h2 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.order-number {
+  font-size: 1.2rem;
+  color: #34495e;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.order-email,
+.estimated-delivery {
+  color: #7f8c8d;
+  margin-bottom: 0.5rem;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.home-button,
+.shop-more-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.home-button {
+  background-color: #3498db;
+  color: white;
+}
+
+.shop-more-button {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.home-button:hover,
+.shop-more-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+} 

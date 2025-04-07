@@ -31,41 +31,49 @@
   color: #2c3e50;
 }
 
-.input-wrapper {
-  display: flex;
-  align-items: center;
+.form-input {
+  width: 100%;
+  padding: 0.8rem;
   border: 1px solid #ddd;
   border-radius: 5px;
-  overflow: hidden;
+  font-size: 1rem;
+  background-color: white;
+  outline: none;
   transition: all 0.3s ease;
-  width: 100%;
-  position: relative;
 }
 
-.input-wrapper:focus-within {
+.form-input:focus {
   border-color: #f39c12;
   box-shadow: 0 0 0 2px rgba(243, 156, 18, 0.2);
 }
 
-.input-icon {
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-wrapper .form-input {
+  padding-right: 40px; /* Space for the toggle button */
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  color: #7f8c8d;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  min-width: 50px;
-  height: 100%;
-  background-color: #f8f9fa;
-  color: #7f8c8d;
-  border-right: 1px solid #eee;
+  transition: color 0.2s ease;
 }
 
-.form-input {
-  flex: 1;
-  padding: 0.8rem;
-  border: none;
-  outline: none;
-  font-size: 1rem;
-  background-color: white;
+.password-toggle-btn:hover {
+  color: #f39c12;
 }
 
 .submit-button {

@@ -346,3 +346,17 @@ export const getUserWishlist = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
+
+export const clearCart = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    
+    // Update user's cart to empty array
+    await User.findByIdAndUpdate(userId, { cart: [] });
+    
+    res.status(200).json({ message: 'Cart cleared successfully' });
+  } catch (error) {
+    console.error('Error clearing cart:', error);
+    res.status(500).json({ message: 'Error clearing cart' });
+  }
+};

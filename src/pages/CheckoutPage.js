@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   FaArrowLeft, 
-  FaCreditCard, 
   FaMapMarkerAlt, 
   FaShoppingCart, 
   FaTruck,
@@ -27,10 +26,6 @@ const CheckoutPage = () => {
     city: '',
     zipCode: '',
     country: '',
-    cardNumber: '',
-    cardName: '',
-    expDate: '',
-    cvv: '',
   });
   
   const [shippingMethod, setShippingMethod] = useState('standard');
@@ -121,6 +116,90 @@ const CheckoutPage = () => {
       total: total.toFixed(2)
     };
   };
+
+  // Initialize RazorPay payment
+  const initializeRazorpayPayment = async (orderAmount) => {
+    const options = {
+      key: 'rzp_test_l3iiBr281IE9vB',
+      amount: Math.round(orderAmount * 100), // RazorPay expects amount in paise
+      currency: 'INR',
+      name: 'Wardrobe Wizard',
+      description: 'Purchase from Wardrobe Wizard',
+      image: '/logo192.png',
+      handler: async function (response) {
+        console.log('Payment successful:', response);
+        try {
+          // Store order details for confirmation page
+          const orderDetails = {
+            orderId: 'WW-' + Math.floor(100000 + Math.random() * 900000),
+            email: formData.email,
+            amount: orderAmount,
+            paymentId: response.razorpay_payment_id
+          };
+          localStorage.setItem('lastOrder', JSON.stringify(orderDetails));
+          
+          // Try to clear cart, but don't let it block the success flow
+          try {
+            await axios.delete('/api/users/cart/clear', {
+              data: { userId: userData._id },
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+              }
+            });
+            console.log('Cart cleared successfully');
+          } catch (cartError) {
+            console.warn('Failed to clear server cart:', cartError);
+            // Continue with the success flow even if cart clearing fails
+          }
+          
+          // Clear local cart
+          localStorage.setItem('cart', JSON.stringify([]));
+          
+          // Trigger storage event to update cart count in navbar
+          window.dispatchEvent(new Event('storage'));
+          
+          // Set order placed state
+          setOrderPlaced(true);
+          setLoading(false);
+          
+          // Navigate to order confirmation page
+          navigate('/order-confirmed');
+        } catch (err) {
+          console.error('Error processing order:', err);
+          setError('Failed to process your order. Please try again.');
+          setLoading(false);
+          navigate('/unable-to-place-order');
+        }
+      },
+      modal: {
+        ondismiss: function() {
+          console.log('Payment modal dismissed');
+          setLoading(false);
+          navigate('/unable-to-place-order');
+        }
+      },
+      prefill: {
+        name: formData.fullName,
+        email: formData.email,
+        contact: userData?.phone || ''
+      },
+      notes: {
+        address: `${formData.address}, ${formData.city}, ${formData.zipCode}, ${formData.country}`,
+        shipping_method: shippingMethod
+      },
+      theme: {
+        color: '#f39c12'
+      }
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.on('payment.failed', function (response) {
+      console.error('Payment failed:', response);
+      setLoading(false);
+      navigate('/unable-to-place-order');
+    });
+    rzp.open();
+  };
   
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -135,32 +214,12 @@ const CheckoutPage = () => {
     }
     
     try {
-      // In a real app, you would process payment and create order here
       setLoading(true);
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Clear cart after successful checkout
-      await axios.delete('/api/users/cart/clear', {
-        data: { userId: userData._id },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      // Clear local cart
-      localStorage.setItem('cart', JSON.stringify([]));
-      
-      // Update UI
-      setOrderPlaced(true);
-      setLoading(false);
-      
-      // Trigger storage event to update cart count in navbar
-      window.dispatchEvent(new Event('storage'));
+      const summary = calculateSummary();
+      await initializeRazorpayPayment(parseFloat(summary.total));
     } catch (err) {
-      console.error('Error placing order:', err);
-      setError('Failed to process your order. Please try again.');
+      console.error('Error initializing payment:', err);
+      setError('Failed to initialize payment. Please try again.');
       setLoading(false);
     }
   };
@@ -239,8 +298,6 @@ const CheckoutPage = () => {
     );
   }
   
-  const summary = calculateSummary();
-  
   return (
     <div className="checkout-container">
       <div className="checkout-header">
@@ -250,219 +307,130 @@ const CheckoutPage = () => {
         </Link>
       </div>
       
-      <div className="checkout-content">
-        <form className="checkout-form" onSubmit={handleSubmit}>
-          <div className="form-section">
-            <h3 className="section-title">
-              <FaMapMarkerAlt /> Shipping Address
-            </h3>
-            <div className="input-row">
-              <div className="form-group">
-                <label htmlFor="fullName">Full Name</label>
-                <input
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="email">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
-            
+      <form onSubmit={handleSubmit} className="checkout-form">
+        {/* Shipping Information */}
+        <div className="form-section">
+          <h3><FaMapMarkerAlt /> Shipping Information</h3>
+          <div className="form-group">
+            <input
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              placeholder="Full Name"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Email Address"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              placeholder="Street Address"
+              required
+            />
+          </div>
+          <div className="form-row">
             <div className="form-group">
-              <label htmlFor="address">Address</label>
               <input
                 type="text"
-                id="address"
-                name="address"
-                value={formData.address}
+                name="city"
+                value={formData.city}
                 onChange={handleInputChange}
+                placeholder="City"
                 required
               />
             </div>
-            
-            <div className="input-row">
-              <div className="form-group">
-                <label htmlFor="city">City</label>
-                <input
-                  type="text"
-                  id="city"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="zipCode">ZIP Code</label>
-                <input
-                  type="text"
-                  id="zipCode"
-                  name="zipCode"
-                  value={formData.zipCode}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="country">Country</label>
-                <input
-                  type="text"
-                  id="country"
-                  name="country"
-                  value={formData.country}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="form-section">
-            <h3 className="section-title">
-              <FaTruck /> Shipping Method
-            </h3>
-            <div className="shipping-options">
-              <div 
-                className={`shipping-option ${shippingMethod === 'standard' ? 'selected' : ''}`}
-                onClick={() => handleShippingChange('standard')}
-              >
-                <div className="option-radio">
-                  <div className={`radio-inner ${shippingMethod === 'standard' ? 'selected' : ''}`}></div>
-                </div>
-                <div className="option-details">
-                  <span className="option-name">Standard Delivery</span>
-                  <span className="option-price">{parseFloat(summary.subtotal) > 50 ? 'FREE' : '$5.99'}</span>
-                  <span className="option-time">3-5 business days</span>
-                </div>
-              </div>
-              
-              <div 
-                className={`shipping-option ${shippingMethod === 'express' ? 'selected' : ''}`}
-                onClick={() => handleShippingChange('express')}
-              >
-                <div className="option-radio">
-                  <div className={`radio-inner ${shippingMethod === 'express' ? 'selected' : ''}`}></div>
-                </div>
-                <div className="option-details">
-                  <span className="option-name">Express Delivery</span>
-                  <span className="option-price">$12.99</span>
-                  <span className="option-time">1-2 business days</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="form-section">
-            <h3 className="section-title">
-              <FaCreditCard /> Payment Information
-            </h3>
             <div className="form-group">
-              <label htmlFor="cardNumber">Card Number</label>
               <input
                 type="text"
-                id="cardNumber"
-                name="cardNumber"
-                value={formData.cardNumber}
+                name="zipCode"
+                value={formData.zipCode}
                 onChange={handleInputChange}
-                placeholder="XXXX XXXX XXXX XXXX"
+                placeholder="ZIP Code"
                 required
               />
             </div>
-            
-            <div className="input-row">
-              <div className="form-group">
-                <label htmlFor="cardName">Name on Card</label>
-                <input
-                  type="text"
-                  id="cardName"
-                  name="cardName"
-                  value={formData.cardName}
-                  onChange={handleInputChange}
-                  required
-                />
+          </div>
+          <div className="form-group">
+            <input
+              type="text"
+              name="country"
+              value={formData.country}
+              onChange={handleInputChange}
+              placeholder="Country"
+              required
+            />
+          </div>
+        </div>
+        
+        {/* Shipping Method */}
+        <div className="form-section">
+          <h3><FaTruck /> Shipping Method</h3>
+          <div className="shipping-options">
+            <div 
+              className={`shipping-option ${shippingMethod === 'standard' ? 'selected' : ''}`}
+              onClick={() => handleShippingChange('standard')}
+            >
+              <div className="option-details">
+                <h4>Standard Shipping</h4>
+                <p>5-7 business days</p>
+                <p className="shipping-price">
+                  {calculateSummary().subtotal > 50 ? 'FREE' : '$5.99'}
+                </p>
               </div>
-              <div className="form-group">
-                <label htmlFor="expDate">Expiration Date</label>
-                <input
-                  type="text"
-                  id="expDate"
-                  name="expDate"
-                  value={formData.expDate}
-                  onChange={handleInputChange}
-                  placeholder="MM/YY"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="cvv">CVV</label>
-                <input
-                  type="text"
-                  id="cvv"
-                  name="cvv"
-                  value={formData.cvv}
-                  onChange={handleInputChange}
-                  placeholder="XXX"
-                  required
-                />
+            </div>
+            <div 
+              className={`shipping-option ${shippingMethod === 'express' ? 'selected' : ''}`}
+              onClick={() => handleShippingChange('express')}
+            >
+              <div className="option-details">
+                <h4>Express Shipping</h4>
+                <p>2-3 business days</p>
+                <p className="shipping-price">$12.99</p>
               </div>
             </div>
           </div>
-          
-          <div className="order-summary">
-            <h3 className="summary-title">
-              <FaShoppingCart /> Order Summary
-            </h3>
-            <div className="summary-items">
-              {cartItems.map(item => (
-                <div className="summary-item" key={item.productId}>
-                  <span className="item-name">
-                    {item.productDetails['Product Name']} × {item.quantity}
-                  </span>
-                  <span className="item-price">
-                    ${(parseFloat(item.productDetails['Discount Price'] || item.productDetails['Price']) * item.quantity).toFixed(2)}
-                  </span>
-                </div>
-              ))}
+        </div>
+        
+        {/* Order Summary */}
+        <div className="order-summary">
+          <h3><FaShoppingCart /> Order Summary</h3>
+          <div className="summary-details">
+            <div className="summary-row">
+              <span>Subtotal</span>
+              <span>${calculateSummary().subtotal}</span>
             </div>
-            
-            <div className="summary-totals">
-              <div className="summary-row">
-                <span>Subtotal</span>
-                <span>${summary.subtotal}</span>
-              </div>
-              <div className="summary-row">
-                <span>Shipping</span>
-                <span>${summary.shipping}</span>
-              </div>
-              <div className="summary-row">
-                <span>Tax</span>
-                <span>${summary.tax}</span>
-              </div>
-              <div className="summary-row total">
-                <span>Total</span>
-                <span>${summary.total}</span>
-              </div>
+            <div className="summary-row">
+              <span>Shipping</span>
+              <span>${calculateSummary().shipping}</span>
+            </div>
+            <div className="summary-row">
+              <span>Tax</span>
+              <span>${calculateSummary().tax}</span>
+            </div>
+            <div className="summary-row total">
+              <span>Total</span>
+              <span>${calculateSummary().total}</span>
             </div>
           </div>
-          
-          <button type="submit" className="place-order-button">
-            Place Order (${summary.total})
-          </button>
-        </form>
-      </div>
+        </div>
+        
+        <button type="submit" className="checkout-button" disabled={loading}>
+          {loading ? 'Processing...' : 'Place Order'}
+        </button>
+      </form>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaEnvelope, FaLock, FaUser, FaUserPlus } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaUser, FaUserPlus, FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
 import '../styles/pages/register.css';
 
@@ -12,6 +12,11 @@ const Register = () => {
     confirmPassword: ''
   });
   
+  const [showPassword, setShowPassword] = useState({
+    password: false,
+    confirmPassword: false
+  });
+
   const [validations, setValidations] = useState({
     username: true,
     email: true,
@@ -54,6 +59,13 @@ const Register = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const togglePasswordVisibility = (field) => {
+    setShowPassword(prev => ({
+      ...prev,
+      [field]: !prev[field]
     }));
   };
 
@@ -139,23 +151,17 @@ const Register = () => {
       <form className="register-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="username" className="form-label">Username</label>
-          <div className="input-wrapper">
-          <span className="input-icon">
-              <FaUser />
-            </span>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              className="form-input"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="Choose a username"
-              required
-              minLength="3"
-            />
-          </div>
-          
+          <input
+            type="text"
+            id="username"
+            name="username"
+            className="form-input"
+            value={formData.username}
+            onChange={handleChange}
+            placeholder="Choose a username"
+            required
+            minLength="3"
+          />
           {formData.username && !validations.username && (
             <span className="validation-message invalid">
               Username must be at least 3 characters
@@ -165,21 +171,16 @@ const Register = () => {
         
         <div className="form-group">
           <label htmlFor="email" className="form-label">Email</label>
-          <div className="input-wrapper">
-            <span className="input-icon">
-              <FaEnvelope />
-            </span>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className="form-input"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              required
-            />
-          </div>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            className="form-input"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+            required
+          />
           {formData.email && !validations.email && (
             <span className="validation-message invalid">
               Please enter a valid email address
@@ -189,12 +190,9 @@ const Register = () => {
         
         <div className="form-group">
           <label htmlFor="password" className="form-label">Password</label>
-          <div className="input-wrapper">
-            <span className="input-icon">
-              <FaLock />
-            </span>
+          <div className="password-input-wrapper">
             <input
-              type="password"
+              type={showPassword.password ? "text" : "password"}
               id="password"
               name="password"
               className="form-input"
@@ -204,6 +202,14 @@ const Register = () => {
               required
               minLength="6"
             />
+            <button 
+              type="button" 
+              className="password-toggle-btn"
+              onClick={() => togglePasswordVisibility('password')}
+              aria-label={showPassword.password ? "Hide password" : "Show password"}
+            >
+              {showPassword.password ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
           {formData.password && !validations.password && (
             <span className="validation-message invalid">
@@ -214,12 +220,9 @@ const Register = () => {
         
         <div className="form-group">
           <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-          <div className="input-wrapper">
-            <span className="input-icon">
-              <FaLock />
-            </span>
+          <div className="password-input-wrapper">
             <input
-              type="password"
+              type={showPassword.confirmPassword ? "text" : "password"}
               id="confirmPassword"
               name="confirmPassword"
               className="form-input"
@@ -228,6 +231,14 @@ const Register = () => {
               placeholder="Confirm your password"
               required
             />
+            <button 
+              type="button" 
+              className="password-toggle-btn"
+              onClick={() => togglePasswordVisibility('confirmPassword')}
+              aria-label={showPassword.confirmPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword.confirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
           {formData.confirmPassword && !validations.passwordMatch && (
             <span className="validation-message invalid">
