@@ -351,12 +351,23 @@ export const clearCart = async (req, res) => {
   try {
     const { userId } = req.body;
     
-    // Update user's cart to empty array
-    await User.findByIdAndUpdate(userId, { cart: [] });
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
     
-    res.status(200).json({ message: 'Cart cleared successfully' });
+    // Delete all cart items for this user
+    const result = await Cart.deleteMany({ userId });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'No cart items found for this user' });
+    }
+    
+    res.status(200).json({ 
+      message: 'Cart cleared successfully',
+      deletedCount: result.deletedCount
+    });
   } catch (error) {
     console.error('Error clearing cart:', error);
-    res.status(500).json({ message: 'Error clearing cart' });
+    res.status(500).json({ message: 'Error clearing cart', error: error.message });
   }
 };

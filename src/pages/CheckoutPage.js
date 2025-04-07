@@ -140,13 +140,13 @@ const CheckoutPage = () => {
           
           // Try to clear cart, but don't let it block the success flow
           try {
-            await axios.delete('/api/users/cart/clear', {
+            const response = await axios.delete('http://localhost:5001/api/users/cart/clear', {
               data: { userId: userData._id },
               headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`
               }
             });
-            console.log('Cart cleared successfully');
+            console.log('Cart cleared successfully:', response.data);
           } catch (cartError) {
             console.warn('Failed to clear server cart:', cartError);
             // Continue with the success flow even if cart clearing fails

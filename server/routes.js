@@ -8,7 +8,8 @@ import {
   addToWishlist,
   removeFromWishlist,
   getUserCart,
-  getUserWishlist 
+  getUserWishlist,
+  clearCart
 } from './controllers/productController.js';
 import {
   register,
@@ -37,6 +38,7 @@ router.post('/cart', addToCart);
 router.put('/cart', updateCartItemQuantity);
 router.delete('/cart', removeFromCart);
 router.get('/users/:userId/cart', getUserCart);
+router.delete('/users/cart/clear', protect, clearCart);
 
 // Wishlist routes
 router.post('/wishlist', addToWishlist);
