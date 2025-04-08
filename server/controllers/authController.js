@@ -13,10 +13,55 @@ export const register = async (req, res) => {
   try {
     const { username, email, password, city } = req.body;
 
+    // Input validation
+    const errors = [];
+    
+    // Username validation
+    if (!username || username.trim().length < 3) {
+      errors.push('Username must be at least 3 characters');
+    }
+    
+    if (username && !/^[a-zA-Z0-9_]+$/.test(username)) {
+      errors.push('Username can only contain letters, numbers, and underscores');
+    }
+    
+    // Email validation
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.push('Please provide a valid email address');
+    }
+    
+    // Password validation
+    if (!password || password.length < 8) {
+      errors.push('Password must be at least 8 characters');
+    }
+    
+    // Check password complexity
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
+    
+    // Calculate password strength (at least 3 criteria must be met)
+    const passwordStrength = [hasUppercase, hasLowercase, hasNumber, hasSpecialChar].filter(Boolean).length;
+    
+    if (password && passwordStrength < 3) {
+      errors.push('Password is too weak. Include uppercase, lowercase, numbers, and special characters');
+    }
+    
+    // Return validation errors if any
+    if (errors.length > 0) {
+      return res.status(400).json({ message: errors[0], errors });
+    }
+
     // Check if user already exists
-    const userExists = await User.findOne({ $or: [{ email }, { username }] });
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email is already registered' });
+    }
+    
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({ message: 'Username is already taken' });
     }
 
     // Create new user
@@ -39,6 +84,7 @@ export const register = async (req, res) => {
       });
     }
   } catch (error) {
+    console.error('Registration error:', error);
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
@@ -47,11 +93,22 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    
+    // Input validation
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Please provide both email and password' });
+    }
+    
+    // Email validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: 'Please provide a valid email address' });
+    }
 
     // Find user by email
     const user = await User.findOne({ email });
     
     if (!user) {
+      // Use a generic message for security
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
@@ -70,6 +127,7 @@ export const login = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };

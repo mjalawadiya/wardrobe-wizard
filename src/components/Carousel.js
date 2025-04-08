@@ -6,18 +6,24 @@ import ImageLoader from './ImageLoader.js';
 
 const CarouselContainer = styled.div`
   position: relative;
-  width: 100vw;
+  width: calc(100vw - 40px);
+  max-width: 1200px;
   height: 500px;
   overflow: hidden;
-  margin: 0;
+  margin: 20px auto;
   padding: 0;
   box-sizing: border-box;
   background-color: #000;
   left: 50%;
   transform: translateX(-50%);
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   
   @media (max-width: 768px) {
     height: 300px;
+    width: calc(100vw - 20px);
+    margin: 10px auto;
+    border-radius: 15px;
   }
 `;
 
@@ -35,6 +41,7 @@ const Slide = styled.div`
   height: 100%;
   position: relative;
   overflow: hidden;
+  border-radius: 20px;
 `;
 
 const SlideImage = styled(ImageLoader)`
