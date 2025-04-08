@@ -19,7 +19,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # RapidAPI configuration
-RAPIDAPI_KEY = "9c4711bc94mshabdd30ab1be0d8ep1af938jsn75046fa96796"
+RAPIDAPI_KEY = "ec30e71a0emshc689a68a2ed9c7ap194669jsn20cce51232d7"
 RAPIDAPI_HOST = "virtual-try-on2.p.rapidapi.com"
 RAPIDAPI_URL = "https://virtual-try-on2.p.rapidapi.com/clothes-virtual-tryon"
 

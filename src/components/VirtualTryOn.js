@@ -49,42 +49,37 @@ const VirtualTryOn = () => {
             console.log("API Response:", data);
 
             if (response.ok) {
-                // Case 1: We have a base64 image
                 if (data.result_image) {
-                    console.log("Displaying base64 image");
-                    setResultImage(`data:image/jpeg;base64,${data.result_image}`);
-                } 
-                // Case 2: We have a direct image URL
-                else if (data.image_url) {
-                    console.log("Displaying image URL:", data.image_url);
-                    // For direct URLs, make sure it's treated as an image source
-                    setResultImage(data.image_url);
+                    console.log("Got base64 image");
                     
-                    // Optional: If the URL directly triggers a download instead of displaying,
-                    // we could try to fetch and convert it to a blob URL
-                    try {
-                        const imgResponse = await fetch(data.image_url);
-                        if (imgResponse.ok) {
-                            const blob = await imgResponse.blob();
-                            const blobUrl = URL.createObjectURL(blob);
-                            console.log("Created blob URL for display:", blobUrl);
-                            setResultImage(blobUrl);
-                        }
-                    } catch (fetchErr) {
-                        console.error("Error converting download URL to blob:", fetchErr);
-                        // Fall back to original URL if fetch fails
-                    }
+                    // Make sure the base64 data is clean (no whitespace)
+                    const cleanBase64 = data.result_image.replace(/\s/g, '');
+                    
+                    // Create a complete data URL
+                    const imageUrl = `data:image/jpeg;base64,${cleanBase64}`;
+                    console.log("Image URL created with length:", imageUrl.length);
+                    
+                    // Update state with the image URL
+                    setResultImage(imageUrl);
+                    
+                    // Automatically download the image
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = imageUrl;
+                    downloadLink.download = 'try-on-result.jpg';
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
                 } 
-                // Case 3: No image found
+                else if (data.image_url) {
+                    console.log("Got image URL:", data.image_url);
+                    setResultImage(data.image_url);
+                } 
                 else {
                     setError('No image was returned from the API');
                     setShowDebug(true);
                 }
             } else {
                 setError(data.error || 'Failed to process images');
-                if (data.details) {
-                    setError(prev => `${prev} - ${data.details}`);
-                }
                 setShowDebug(true);
             }
         } catch (err) {
@@ -94,38 +89,6 @@ const VirtualTryOn = () => {
             setShowDebug(true);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const downloadImage = () => {
-        if (resultImage) {
-            try {
-                // If we're using a blob URL that we created, we can get the original URL from debug info
-                if (resultImage.startsWith('blob:') && debugInfo) {
-                    const originalUrl = JSON.parse(debugInfo)?.image_url;
-                    if (originalUrl) {
-                        // Create an invisible anchor to trigger download from original URL
-                        const downloadLink = document.createElement('a');
-                        downloadLink.href = originalUrl;
-                        downloadLink.download = 'try-on-result.jpg';
-                        document.body.appendChild(downloadLink);
-                        downloadLink.click();
-                        document.body.removeChild(downloadLink);
-                        return;
-                    }
-                }
-                
-                // For data URLs or as fallback, use the resultImage directly
-                const downloadLink = document.createElement('a');
-                downloadLink.href = resultImage;
-                downloadLink.download = 'try-on-result.jpg';
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-            } catch (err) {
-                console.error("Error downloading image:", err);
-                setError("Failed to download image. Please try the 'View Original' link if available.");
-            }
         }
     };
 
@@ -194,71 +157,49 @@ const VirtualTryOn = () => {
                 )}
                 
                 {resultImage && (
-                    <div className="result-section">
-                        <h3>Try-On Result</h3>
-                        <div className="result-image-container">
-                            <img 
+                    <div id="result" className="result-section">
+                        <h2>Result:</h2>
+                        
+                        {/* Direct iframe embedding to ensure image display */}
+                        <div style={{ 
+                            width: '100%', 
+                            height: '500px', 
+                            border: '1px solid #ddd',
+                            borderRadius: '5px',
+                            backgroundColor: '#f8f8f8',
+                            overflow: 'hidden' 
+                        }}>
+                            <iframe 
                                 src={resultImage} 
-                                alt="Try-on result" 
-                                className="result-image"
-                                onError={(e) => {
-                                    console.error("Error loading image:", e);
-                                    console.log("Current image source:", resultImage);
-                                    // Try to reload as link
-                                    e.target.onerror = null;
-                                    if (resultImage.startsWith('data:')) {
-                                        console.log("Base64 image failed to load");
-                                        setError("Failed to display base64 image");
-                                    } else if (resultImage.startsWith('blob:')) {
-                                        console.log("Blob URL failed to load");
-                                        const originalUrl = JSON.parse(debugInfo)?.image_url;
-                                        if (originalUrl) {
-                                            console.log("Falling back to original URL:", originalUrl);
-                                            e.target.src = originalUrl;
-                                        }
-                                    } else {
-                                        console.log("Direct URL failed to load");
-                                        setError("Failed to display image. Please try downloading it instead.");
-                                    }
-                                }}
-                                onLoad={() => {
-                                    console.log("Image loaded successfully");
-                                    console.log("Image dimensions:", e.target.naturalWidth, "x", e.target.naturalHeight);
+                                title="Try-on Result"
+                                style={{ 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    border: 'none',
+                                    display: 'block'
                                 }}
                             />
                         </div>
-                        <div className="result-actions">
-                            <button 
-                                onClick={downloadImage} 
-                                className="download-button"
+                        
+                        <p>
+                            <a 
+                                className="download-link" 
+                                href={resultImage} 
+                                download="try-on-result.jpg"
                             >
                                 Download Image
-                            </button>
-                            {resultImage.startsWith('blob:') && (
-                                <a 
-                                    href={JSON.parse(debugInfo)?.image_url || resultImage} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="view-original-link"
-                                >
-                                    View Original
-                                </a>
-                            )}
-                        </div>
-                    </div>
-                )}
-                
-                {debugInfo && (
-                    <div className="debug-section">
-                        <button 
-                            onClick={toggleDebugInfo} 
-                            className="debug-toggle"
+                            </a>
+                        </p>
+                        
+                        <span 
+                            className="debug-toggle" 
+                            onClick={toggleDebugInfo}
                         >
-                            {showDebug ? 'Hide Debug Info' : 'Show Debug Info'}
-                        </button>
+                            Toggle debug information
+                        </span>
+                        
                         {showDebug && (
                             <div className="debug-info">
-                                <h4>Debug Information</h4>
                                 <pre>{debugInfo}</pre>
                             </div>
                         )}
