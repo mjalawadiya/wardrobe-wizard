@@ -142,20 +142,29 @@
     justify-content: center;
     margin: 0 auto;
     max-width: 100%;
+    min-height: 200px;
+    position: relative;
+    background-color: #f0f0f0;
+    border: 1px dashed #ccc;
+    padding: 1rem;
 }
 
 .result-image {
     max-width: 100%;
     max-height: 500px;
+    min-height: 200px;
     object-fit: contain;
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background-color: white;
 }
 
 .result-actions {
     margin-top: 1.5rem;
     display: flex;
     justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .download-button {
@@ -175,6 +184,26 @@
 
 .download-button:hover {
     background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.view-original-link {
+    padding: 0.8rem 1.5rem;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.view-original-link:hover {
+    background-color: #27ae60;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

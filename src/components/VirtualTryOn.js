@@ -46,13 +46,37 @@ const VirtualTryOn = () => {
 
             const data = await response.json();
             setDebugInfo(JSON.stringify(data, null, 2));
+            console.log("API Response:", data);
 
             if (response.ok) {
+                // Case 1: We have a base64 image
                 if (data.result_image) {
+                    console.log("Displaying base64 image");
                     setResultImage(`data:image/jpeg;base64,${data.result_image}`);
-                } else if (data.image_url) {
+                } 
+                // Case 2: We have a direct image URL
+                else if (data.image_url) {
+                    console.log("Displaying image URL:", data.image_url);
+                    // For direct URLs, make sure it's treated as an image source
                     setResultImage(data.image_url);
-                } else {
+                    
+                    // Optional: If the URL directly triggers a download instead of displaying,
+                    // we could try to fetch and convert it to a blob URL
+                    try {
+                        const imgResponse = await fetch(data.image_url);
+                        if (imgResponse.ok) {
+                            const blob = await imgResponse.blob();
+                            const blobUrl = URL.createObjectURL(blob);
+                            console.log("Created blob URL for display:", blobUrl);
+                            setResultImage(blobUrl);
+                        }
+                    } catch (fetchErr) {
+                        console.error("Error converting download URL to blob:", fetchErr);
+                        // Fall back to original URL if fetch fails
+                    }
+                } 
+                // Case 3: No image found
+                else {
                     setError('No image was returned from the API');
                     setShowDebug(true);
                 }
@@ -64,6 +88,7 @@ const VirtualTryOn = () => {
                 setShowDebug(true);
             }
         } catch (err) {
+            console.error("API Error:", err);
             setError('Failed to connect to the server');
             setDebugInfo(err.message);
             setShowDebug(true);
@@ -74,12 +99,33 @@ const VirtualTryOn = () => {
 
     const downloadImage = () => {
         if (resultImage) {
-            const downloadLink = document.createElement('a');
-            downloadLink.href = resultImage;
-            downloadLink.download = 'try-on-result.jpg';
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
+            try {
+                // If we're using a blob URL that we created, we can get the original URL from debug info
+                if (resultImage.startsWith('blob:') && debugInfo) {
+                    const originalUrl = JSON.parse(debugInfo)?.image_url;
+                    if (originalUrl) {
+                        // Create an invisible anchor to trigger download from original URL
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = originalUrl;
+                        downloadLink.download = 'try-on-result.jpg';
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                        return;
+                    }
+                }
+                
+                // For data URLs or as fallback, use the resultImage directly
+                const downloadLink = document.createElement('a');
+                downloadLink.href = resultImage;
+                downloadLink.download = 'try-on-result.jpg';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            } catch (err) {
+                console.error("Error downloading image:", err);
+                setError("Failed to download image. Please try the 'View Original' link if available.");
+            }
         }
     };
 
@@ -154,7 +200,31 @@ const VirtualTryOn = () => {
                             <img 
                                 src={resultImage} 
                                 alt="Try-on result" 
-                                className="result-image" 
+                                className="result-image"
+                                onError={(e) => {
+                                    console.error("Error loading image:", e);
+                                    console.log("Current image source:", resultImage);
+                                    // Try to reload as link
+                                    e.target.onerror = null;
+                                    if (resultImage.startsWith('data:')) {
+                                        console.log("Base64 image failed to load");
+                                        setError("Failed to display base64 image");
+                                    } else if (resultImage.startsWith('blob:')) {
+                                        console.log("Blob URL failed to load");
+                                        const originalUrl = JSON.parse(debugInfo)?.image_url;
+                                        if (originalUrl) {
+                                            console.log("Falling back to original URL:", originalUrl);
+                                            e.target.src = originalUrl;
+                                        }
+                                    } else {
+                                        console.log("Direct URL failed to load");
+                                        setError("Failed to display image. Please try downloading it instead.");
+                                    }
+                                }}
+                                onLoad={() => {
+                                    console.log("Image loaded successfully");
+                                    console.log("Image dimensions:", e.target.naturalWidth, "x", e.target.naturalHeight);
+                                }}
                             />
                         </div>
                         <div className="result-actions">
@@ -164,6 +234,16 @@ const VirtualTryOn = () => {
                             >
                                 Download Image
                             </button>
+                            {resultImage.startsWith('blob:') && (
+                                <a 
+                                    href={JSON.parse(debugInfo)?.image_url || resultImage} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="view-original-link"
+                                >
+                                    View Original
+                                </a>
+                            )}
                         </div>
                     </div>
                 )}
