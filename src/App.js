@@ -19,6 +19,7 @@ import TermsPage from './pages/TermsPage.js';
 import ScrollToTop from './components/ScrollToTop.js';
 import OrderConfirmed from './pages/OrderConfirmed.js';
 import UnableToPlaceOrder from './pages/UnableToPlaceOrder.js';
+import VirtualTryOnPage from './pages/VirtualTryOnPage.js';
 import './App.css';
 import { UserProvider } from './contexts/UserContext.js';
 
@@ -79,6 +80,7 @@ function App() {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/order-confirmed" element={<OrderConfirmed />} />
             <Route path="/unable-to-place-order" element={<UnableToPlaceOrder />} />
+            <Route path="/virtual-tryon" element={<VirtualTryOnPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

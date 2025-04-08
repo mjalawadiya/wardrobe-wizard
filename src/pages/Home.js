@@ -8,7 +8,6 @@ import WeatherRecommendations from '../components/WeatherRecommendations.js';
 import { FaArrowRight, FaTshirt, FaStar, FaSearch } from 'react-icons/fa';
 import { generateRandomTshirts } from '../services/productService.js';
 import ImageLoader from '../components/ImageLoader.js';
-import VirtualTryOn from '../components/VirtualTryOn.js';
 import './Home.css';
 import { useUser } from '../contexts/UserContext.js';
 
@@ -258,10 +257,6 @@ const SearchButton = styled.button`
   }
 `;
 
-const VirtualTryOnSection = styled.section`
-  margin: 4rem 0;
-`;
-
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [topRatedProducts, setTopRatedProducts] = useState([]);
@@ -378,16 +373,6 @@ const Home = () => {
         {userContextData ? <WeatherRecommendations /> : null}
         
         <Carousel />
-        
-        {/* Virtual Try-On Section */}
-        <VirtualTryOnSection>
-          <SectionHeader>
-            <SectionTitle>
-              <FaTshirt /> Virtual Try-On
-            </SectionTitle>
-          </SectionHeader>
-          <VirtualTryOn />
-        </VirtualTryOnSection>
         
         {/* Featured Products Section */}
         <FeaturedSection>

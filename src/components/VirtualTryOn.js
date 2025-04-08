@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './VirtualTryOn.css';
+import UploadSection from './VirtualTryOn/UploadSection.js';
 
 const VirtualTryOn = () => {
     const [modelImage, setModelImage] = useState(null);
@@ -7,19 +8,14 @@ const VirtualTryOn = () => {
     const [resultImage, setResultImage] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [debugInfo, setDebugInfo] = useState(null);
-    const [showDebug, setShowDebug] = useState(false);
+    const iframeRef = useRef(null);
 
-    const handleModelImageChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            setModelImage(e.target.files[0]);
-        }
+    const handleModelImageUpload = (imageData) => {
+        setModelImage(imageData);
     };
 
-    const handleClothImageChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            setClothImage(e.target.files[0]);
-        }
+    const handleClothImageUpload = (imageData) => {
+        setClothImage(imageData);
     };
 
     const handleTryOn = async (e) => {
@@ -32,11 +28,15 @@ const VirtualTryOn = () => {
         setLoading(true);
         setError(null);
         setResultImage(null);
-        setDebugInfo(null);
 
         const formData = new FormData();
-        formData.append('person_image', modelImage);
-        formData.append('cloth_image', clothImage);
+        
+        // Convert base64 to blob for the API
+        const modelBlob = await fetch(modelImage).then(r => r.blob());
+        const clothBlob = await fetch(clothImage).then(r => r.blob());
+        
+        formData.append('person_image', modelBlob);
+        formData.append('cloth_image', clothBlob);
 
         try {
             const response = await fetch('http://localhost:5000/api/try-on', {
@@ -45,30 +45,12 @@ const VirtualTryOn = () => {
             });
 
             const data = await response.json();
-            setDebugInfo(JSON.stringify(data, null, 2));
             console.log("API Response:", data);
 
             if (response.ok) {
                 if (data.result_image) {
                     console.log("Got base64 image");
-                    
-                    // Make sure the base64 data is clean (no whitespace)
-                    const cleanBase64 = data.result_image.replace(/\s/g, '');
-                    
-                    // Create a complete data URL
-                    const imageUrl = `data:image/jpeg;base64,${cleanBase64}`;
-                    console.log("Image URL created with length:", imageUrl.length);
-                    
-                    // Update state with the image URL
-                    setResultImage(imageUrl);
-                    
-                    // Automatically download the image
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = imageUrl;
-                    downloadLink.download = 'try-on-result.jpg';
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
+                    setResultImage(data.result_image);
                 } 
                 else if (data.image_url) {
                     console.log("Got image URL:", data.image_url);
@@ -76,24 +58,65 @@ const VirtualTryOn = () => {
                 } 
                 else {
                     setError('No image was returned from the API');
-                    setShowDebug(true);
                 }
             } else {
                 setError(data.error || 'Failed to process images');
-                setShowDebug(true);
             }
         } catch (err) {
             console.error("API Error:", err);
             setError('Failed to connect to the server');
-            setDebugInfo(err.message);
-            setShowDebug(true);
         } finally {
             setLoading(false);
         }
     };
 
-    const toggleDebugInfo = () => {
-        setShowDebug(!showDebug);
+    // Effect to update iframe content when resultImage changes
+    useEffect(() => {
+        if (resultImage && iframeRef.current) {
+            const iframe = iframeRef.current;
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            
+            iframeDoc.open();
+            iframeDoc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body {
+                            margin: 0;
+                            padding: 0;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100vh;
+                            background-color: #ffffff;
+                        }
+                        img {
+                            max-width: 100%;
+                            max-height: 100vh;
+                            object-fit: contain;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <img src="data:image/jpeg;charset=utf-8;base64,${resultImage}" alt="Try-on Result" />
+                </body>
+                </html>
+            `);
+            iframeDoc.close();
+        }
+    }, [resultImage]);
+
+    // Handle download image
+    const handleDownload = () => {
+        if (resultImage) {
+            const downloadLink = document.createElement('a');
+            downloadLink.href = `data:image/jpeg;base64,${resultImage}`;
+            downloadLink.download = 'try-on-result.jpg';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
     };
 
     return (
@@ -102,44 +125,18 @@ const VirtualTryOn = () => {
 
             <div className="main-content">
                 <div className="try-on-form">
-                    <div className="image-upload-section">
-                        <div className="upload-group">
-                            <label htmlFor="model-image">Model Image:</label>
-                            <input
-                                type="file"
-                                id="model-image"
-                                accept="image/jpeg,image/jpg,image/png"
-                                onChange={handleModelImageChange}
-                            />
-                            {modelImage && (
-                                <div className="preview-container">
-                                    <img
-                                        src={URL.createObjectURL(modelImage)}
-                                        alt="Model preview"
-                                        className="preview-image"
-                                    />
-                                </div>
-                            )}
+                    <div className="upload-sections">
+                        <div className="upload-section-wrapper">
+                            <h3>Your Photo</h3>
+                            <UploadSection onImageUpload={handleModelImageUpload} />
                         </div>
-                        <div className="upload-group">
-                            <label htmlFor="cloth-image">Cloth Image:</label>
-                            <input
-                                type="file"
-                                id="cloth-image"
-                                accept="image/jpeg,image/jpg,image/png"
-                                onChange={handleClothImageChange}
-                            />
-                            {clothImage && (
-                                <div className="preview-container">
-                                    <img
-                                        src={URL.createObjectURL(clothImage)}
-                                        alt="Cloth preview"
-                                        className="preview-image"
-                                    />
-                                </div>
-                            )}
+                        
+                        <div className="upload-section-wrapper">
+                            <h3>Clothing Item</h3>
+                            <UploadSection onImageUpload={handleClothImageUpload} />
                         </div>
                     </div>
+                    
                     <button
                         onClick={handleTryOn}
                         disabled={loading || !modelImage || !clothImage}
@@ -159,50 +156,20 @@ const VirtualTryOn = () => {
                 {resultImage && (
                     <div id="result" className="result-section">
                         <h2>Result:</h2>
-                        
-                        {/* Direct iframe embedding to ensure image display */}
-                        <div style={{ 
-                            width: '100%', 
-                            height: '500px', 
-                            border: '1px solid #ddd',
-                            borderRadius: '5px',
-                            backgroundColor: '#f8f8f8',
-                            overflow: 'hidden' 
-                        }}>
+                        <div className="iframe-container">
                             <iframe 
-                                src={resultImage} 
+                                ref={iframeRef}
                                 title="Try-on Result"
-                                style={{ 
-                                    width: '100%', 
-                                    height: '100%', 
-                                    border: 'none',
-                                    display: 'block'
-                                }}
+                                className="result-iframe"
+                                sandbox="allow-same-origin"
                             />
                         </div>
-                        
-                        <p>
-                            <a 
-                                className="download-link" 
-                                href={resultImage} 
-                                download="try-on-result.jpg"
-                            >
-                                Download Image
-                            </a>
-                        </p>
-                        
-                        <span 
-                            className="debug-toggle" 
-                            onClick={toggleDebugInfo}
+                        <button 
+                            className="download-button" 
+                            onClick={handleDownload}
                         >
-                            Toggle debug information
-                        </span>
-                        
-                        {showDebug && (
-                            <div className="debug-info">
-                                <pre>{debugInfo}</pre>
-                            </div>
-                        )}
+                            Download Image
+                        </button>
                     </div>
                 )}
             </div>

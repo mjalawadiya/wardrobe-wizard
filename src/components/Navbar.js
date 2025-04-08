@@ -11,7 +11,8 @@ import {
   FaUserPlus, 
   FaHome,
   FaStore,
-  FaClipboardList
+  FaClipboardList,
+  FaMagic
 } from 'react-icons/fa';
 import '../styles/components/navbar.css';
 import styled from 'styled-components';
@@ -338,6 +339,12 @@ const Navbar = () => {
               <NavLink to="/products">
                 <FaTshirt />
                 Products
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink to="/virtual-tryon">
+                <FaMagic />
+                Virtual Try-On
               </NavLink>
             </NavItem>
           </NavMenu>
