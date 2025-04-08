@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Try-On Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="file"] {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+        .preview {
+            max-width: 300px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .preview img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        button {
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #result img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        .loading {
+            display: none;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+        }
+        .error {
+            color: #d32f2f;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #ffebee;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            color: #388e3c;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            display: none;
+        }
+        .download-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #2196f3;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .download-link:hover {
+            background-color: #1976d2;
+        }
+        .direct-link {
+            display: block;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+        .debug-info {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f8f8;
+            text-align: left;
+            display: none;
+        }
+        .debug-info pre {
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 12px;
+        }
+        .debug-toggle {
+            font-size: 12px;
+            color: #777;
+            text-decoration: underline;
+            cursor: pointer;
+            margin-top: 15px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Virtual Try-On Test</h1>
+    
+    <form id="tryOnForm">
+        <div class="form-group">
+            <label for="personImage">Model Image:</label>
+            <input type="file" id="personImage" name="person_image" accept="image/jpeg,image/jpg,image/png" required>
+            <div class="preview" id="personPreview"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="clothImage">Cloth Image:</label>
+            <input type="file" id="clothImage" name="cloth_image" accept="image/jpeg,image/jpg,image/png" required>
+            <div class="preview" id="clothPreview"></div>
+        </div>
+
+        <button type="submit" id="submitButton">Try On</button>
+    </form>
+
+    <div class="loading" id="loading">
+        Processing... This may take a few moments.
+    </div>
+
+    <div class="success" id="success"></div>
+    <div class="error" id="error"></div>
+
+    <div id="result"></div>
+    <div class="debug-info" id="debugInfo">
+        <h3>Debug Information</h3>
+        <pre id="debugContent"></pre>
+    </div>
+
+    <script>
+        // Preview images when selected
+        document.getElementById('personImage').addEventListener('change', function(e) {
+            const preview = document.getElementById('personPreview');
+            preview.innerHTML = '';
+            if (this.files && this.files[0]) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(this.files[0]);
+                preview.appendChild(img);
+            }
+        });
+
+        document.getElementById('clothImage').addEventListener('change', function(e) {
+            const preview = document.getElementById('clothPreview');
+            preview.innerHTML = '';
+            if (this.files && this.files[0]) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(this.files[0]);
+                preview.appendChild(img);
+            }
+        });
+
+        // Toggle debug info
+        function toggleDebugInfo() {
+            const debugInfo = document.getElementById('debugInfo');
+            if (debugInfo.style.display === 'none' || !debugInfo.style.display) {
+                debugInfo.style.display = 'block';
+            } else {
+                debugInfo.style.display = 'none';
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('tryOnForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const success = document.getElementById('success');
+            const result = document.getElementById('result');
+            const submitButton = document.getElementById('submitButton');
+            const debugInfo = document.getElementById('debugInfo');
+            const debugContent = document.getElementById('debugContent');
+            
+            // Clear previous results and errors
+            error.textContent = '';
+            error.style.display = 'none';
+            success.textContent = '';
+            success.style.display = 'none';
+            result.innerHTML = '';
+            debugInfo.style.display = 'none';
+            debugContent.textContent = '';
+            loading.style.display = 'block';
+            submitButton.disabled = true;
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/try-on', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                // For debugging - display full response
+                debugContent.textContent = JSON.stringify(data, null, 2);
+                
+                if (response.ok) {
+                    // Case 1: We have a base64 image directly from our server
+                    if (data.result_image) {
+                        // Display base64 image
+                        let resultHTML = `
+                            <h2>Result:</h2>
+                            <img src="data:image/jpeg;base64,${data.result_image}" alt="Try-on Result">
+                            <p><a class="download-link" href="data:image/jpeg;base64,${data.result_image}" download="try-on-result.jpg">Download Image</a></p>
+                        `;
+                        
+                        // If direct image URL is also available, show it
+                        if (data.image_url) {
+                            resultHTML += `
+                                <p>Direct image URL (if download fails):</p>
+                                <div class="direct-link">
+                                    <a href="${data.image_url}" target="_blank">${data.image_url}</a>
+                                </div>
+                            `;
+                        }
+                        
+                        result.innerHTML = resultHTML;
+                        success.textContent = "Try-on completed successfully!";
+                        success.style.display = 'block';
+                        
+                        // Automatically download the image
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = `data:image/jpeg;base64,${data.result_image}`;
+                        downloadLink.download = 'try-on-result.jpg';
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                    } 
+                    // Case 2: We have a direct image URL
+                    else if (data.image_url) {
+                        const imgUrl = data.image_url;
+                        
+                        result.innerHTML = `
+                            <h2>Result:</h2>
+                            <img src="${imgUrl}" alt="Try-on Result">
+                            <p><a class="download-link" href="${imgUrl}" download="try-on-result.jpg">Download Image</a></p>
+                            <p>Direct image URL:</p>
+                            <div class="direct-link">
+                                <a href="${imgUrl}" target="_blank">${imgUrl}</a>
+                            </div>
+                        `;
+                        success.textContent = "Try-on completed successfully!";
+                        success.style.display = 'block';
+                        
+                        // Automatically download the image
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = imgUrl;
+                        downloadLink.download = 'try-on-result.jpg';
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                    } 
+                    // Case 3: No image found, but have raw response
+                    else if (data.raw_response) {
+                        error.textContent = "No image was returned from the API. See debug information for details.";
+                        error.style.display = 'block';
+                        debugInfo.style.display = 'block';
+                    }
+                    // Case 4: No useful information at all
+                    else {
+                        error.textContent = "No image or useful information was returned from the API.";
+                        error.style.display = 'block';
+                        debugInfo.style.display = 'block';
+                    }
+                } else {
+                    error.textContent = `Error: ${data.error || 'Unknown error occurred'}`;
+                    if (data.details) {
+                        error.textContent += ` - ${data.details}`;
+                    }
+                    error.style.display = 'block';
+                    
+                    // Show debug info on error
+                    debugInfo.style.display = 'block';
+                    
+                    // If we have an image URL despite error, still show it
+                    if (data.image_url) {
+                        result.innerHTML = `
+                            <p>Although there was an error, we found an image URL that might work:</p>
+                            <div class="direct-link">
+                                <a href="${data.image_url}" target="_blank">${data.image_url}</a>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (err) {
+                error.textContent = `Error: ${err.message}`;
+                error.style.display = 'block';
+                debugContent.textContent = err.stack || err.message;
+                debugInfo.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                submitButton.disabled = false;
+                
+                // Add debug toggle
+                const toggleLink = document.createElement('span');
+                toggleLink.className = 'debug-toggle';
+                toggleLink.textContent = 'Toggle debug information';
+                toggleLink.onclick = toggleDebugInfo;
+                result.appendChild(toggleLink);
+            }
+        });
+    </script>
+</body>
+</html> 
