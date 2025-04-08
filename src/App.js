@@ -20,6 +20,7 @@ import ScrollToTop from './components/ScrollToTop.js';
 import OrderConfirmed from './pages/OrderConfirmed.js';
 import UnableToPlaceOrder from './pages/UnableToPlaceOrder.js';
 import './App.css';
+import { UserProvider } from './contexts/UserContext.js';
 
 // Custom route component to handle weather-based product routes
 const WeatherProtectedRoute = ({ children }) => {
@@ -38,50 +39,52 @@ const WeatherProtectedRoute = ({ children }) => {
 
 function App() {
   return (
-    <div className="App">
-      <ScrollToTop />
-      <Navbar />
-      <main className="main-content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/wishlist" element={
-            <AuthGuard>
-              <Wishlist />
-            </AuthGuard>
-          } />
-          <Route path="/products" element={
-            <WeatherProtectedRoute>
-              <Product />
-            </WeatherProtectedRoute>
-          } />
-          <Route path="/cart" element={<CartPage cart={[]} />} />
-          <Route path="/checkout" element={
-            <AuthGuard>
-              <CheckoutPage />
-            </AuthGuard>
-          } />
-          <Route path="/account" element={
-            <AuthGuard>
-              <Account />
-            </AuthGuard>
-          } />
-          <Route path="/profile" element={
-            <AuthGuard>
-              <UserProfile />
-            </AuthGuard>
-          } />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/order-confirmed" element={<OrderConfirmed />} />
-          <Route path="/unable-to-place-order" element={<UnableToPlaceOrder />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
-      <Footer />
-    </div>
+    <UserProvider>
+      <div className="App">
+        <ScrollToTop />
+        <Navbar />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/wishlist" element={
+              <AuthGuard>
+                <Wishlist />
+              </AuthGuard>
+            } />
+            <Route path="/products" element={
+              <WeatherProtectedRoute>
+                <Product />
+              </WeatherProtectedRoute>
+            } />
+            <Route path="/cart" element={<CartPage cart={[]} />} />
+            <Route path="/checkout" element={
+              <AuthGuard>
+                <CheckoutPage />
+              </AuthGuard>
+            } />
+            <Route path="/account" element={
+              <AuthGuard>
+                <Account />
+              </AuthGuard>
+            } />
+            <Route path="/profile" element={
+              <AuthGuard>
+                <UserProfile />
+              </AuthGuard>
+            } />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/order-confirmed" element={<OrderConfirmed />} />
+            <Route path="/unable-to-place-order" element={<UnableToPlaceOrder />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </UserProvider>
   );
 }
 
