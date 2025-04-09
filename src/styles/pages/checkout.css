@@ -1,5 +1,6 @@
 .checkout-container {
-  max-width: 1200px;
+  max-width: 1400px;
+  width: 95%;
   margin: 0 auto;
   padding: 2rem;
 }
@@ -299,6 +300,36 @@
   font-weight: 600;
   color: #f39c12;
   margin: 1.5rem 0;
+}
+
+/* Test Payment Information Styles */
+.test-payment-info {
+  background-color: rgba(243, 156, 18, 0.1);
+  border-radius: 5px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.test-payment-info p {
+  margin: 0.5rem 0;
+  color: #7f8c8d;
+}
+
+.test-card-list {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.test-card-list li {
+  margin-bottom: 0.5rem;
+}
+
+.test-note {
+  font-style: italic;
+  font-size: 0.9rem;
+  border-top: 1px solid rgba(243, 156, 18, 0.3);
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
 }
 
 @media (max-width: 768px) {

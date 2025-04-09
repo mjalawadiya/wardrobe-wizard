@@ -54,8 +54,19 @@ const WeatherRecommendations = () => {
     if (weather) {
       const mappedCondition = mapWeatherToCondition(weather);
       setWeatherCondition(mappedCondition);
-      const products = getProductsByWeatherCondition(mappedCondition, 8);
-      setRecommendations(products);
+      
+      // Updated to handle async function
+      const fetchProducts = async () => {
+        try {
+          const products = await getProductsByWeatherCondition(mappedCondition, 6);
+          setRecommendations(products);
+        } catch (error) {
+          console.error('Error fetching product recommendations:', error);
+          setRecommendations([]);
+        }
+      };
+      
+      fetchProducts();
     }
   }, [weather]);
 
@@ -172,11 +183,16 @@ const WeatherRecommendations = () => {
   // If not logged in, show auth required message
   if (!isLoggedIn) {
     return (
-      <div className="weather-recommendations auth-required">
+      <div className="weather-recommendations">
+        <div className="weather-recommendations-header">
+          <h2 className="weather-recommendations-title">
+            <FaCloudSun /> Weather-based Clothing Recommendations
+          </h2>
+        </div>
         <div className="auth-message">
           <FaLock className="auth-icon" />
           <h3>Login Required</h3>
-          <p>You need to be logged in to access weather-based clothing recommendations.</p>
+          <p>You need to be logged in to access personalized weather-based clothing recommendations.</p>
           <button className="auth-button" onClick={handleLoginRedirect}>
             Login Now
           </button>

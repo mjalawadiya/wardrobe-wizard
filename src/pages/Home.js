@@ -74,8 +74,12 @@ const ViewAllLink = styled(Link)`
 
 const ProductGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
+  
+  @media (max-width: 992px) {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
 `;
 
 const CategoriesSection = styled.section`
@@ -279,24 +283,15 @@ const Home = () => {
       try {
         setLoading(true);
         // Generate sample products for demonstration
-        const tshirts = generateRandomTshirts(8);
+        const tshirts = await generateRandomTshirts(6);
         
-        // Simulate API delay
-        setTimeout(() => {
-          // Split into featured and top rated
-          const featured = tshirts.slice(0, 4);
-          const topRated = tshirts.slice(4, 8).map(product => ({
-            id: product.id,
-            name: product['Product Name'],
-            price: product.Price,
-            rating: parseFloat(product.Rating),
-            image: getCategoryImagePath(product.id)
-          }));
-          
-          setFeaturedProducts(featured);
-          setTopRatedProducts(topRated);
-          setLoading(false);
-        }, 500);
+        // Split into featured and top rated - limit to 3 each
+        const featured = tshirts.slice(0, 3);
+        const topRated = tshirts.slice(3, 6);
+        
+        setFeaturedProducts(featured);
+        setTopRatedProducts(topRated);
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching products:', error);
         setLoading(false);
@@ -369,8 +364,8 @@ const Home = () => {
           </SearchForm>
         </SearchContainer>
 
-        {/* Weather recommendations for logged-in users only */}
-        {userContextData ? <WeatherRecommendations /> : null}
+        {/* Weather recommendations section */}
+        <WeatherRecommendations />
         
         <Carousel />
         
@@ -447,14 +442,7 @@ const Home = () => {
           ) : (
             <ProductGrid>
               {topRatedProducts.map(product => (
-                <ProductCard 
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  rating={product.rating}
-                  image={product.image}
-                />
+                <ProductCard key={product.id} product={product} />
               ))}
             </ProductGrid>
           )}

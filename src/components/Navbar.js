@@ -12,7 +12,8 @@ import {
   FaHome,
   FaStore,
   FaClipboardList,
-  FaMagic
+  FaMagic,
+  FaLock
 } from 'react-icons/fa';
 import '../styles/components/navbar.css';
 import styled from 'styled-components';
@@ -46,6 +47,41 @@ const NavLink = styled(Link)`
   &:hover {
     background-color: #f8f9fa;
     color: #f39c12;
+  }
+`;
+
+// Create a styled div for disabled links
+const DisabledNavLink = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  color: #bdc3c7;
+  text-decoration: none;
+  border-radius: 5px;
+  width: 100%;
+  cursor: not-allowed;
+  opacity: 0.7;
+  position: relative;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+  
+  &:hover::after {
+    content: "Please log in to access the Virtual Try-On feature";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #34495e;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   }
 `;
 
@@ -342,10 +378,17 @@ const Navbar = () => {
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink to="/virtual-tryon">
-                <FaMagic />
-                Virtual Try-On
-              </NavLink>
+              {isLoggedIn ? (
+                <NavLink to="/virtual-tryon">
+                  <FaMagic />
+                  Virtual Try-On
+                </NavLink>
+              ) : (
+                <DisabledNavLink>
+                  <FaLock />
+                  Virtual Try-On (Login Required)
+                </DisabledNavLink>
+              )}
             </NavItem>
           </NavMenu>
           

@@ -121,11 +121,41 @@ const CheckoutPage = () => {
   const initializeRazorpayPayment = async (orderAmount) => {
     const options = {
       key: 'rzp_test_l3iiBr281IE9vB',
-      amount: Math.round(orderAmount * 100), // RazorPay expects amount in paise
-      currency: 'INR',
+      amount: Math.round(orderAmount * 100), // RazorPay expects amount in smallest currency unit
+      currency: 'USD', // Changed from INR to USD for international transactions
       name: 'Wardrobe Wizard',
       description: 'Purchase from Wardrobe Wizard',
       image: '/logo192.png',
+      // Enable international payments
+      config: {
+        display: {
+          blocks: {
+            international: {
+              currencies: ['USD']
+            }
+          },
+          preferences: {
+            show_default_blocks: true
+          }
+        }
+      },
+      // Add card details for testing
+      prefill: {
+        name: formData.fullName,
+        email: formData.email,
+        contact: userData?.phone || '',
+        method: 'card',
+        'card[number]': '4111111111111111',
+        'card[expiry]': '12/25',
+        'card[cvv]': '123'
+      },
+      notes: {
+        address: `${formData.address}, ${formData.city}, ${formData.zipCode}, ${formData.country}`,
+        shipping_method: shippingMethod
+      },
+      theme: {
+        color: '#f39c12'
+      },
       handler: async function (response) {
         console.log('Payment successful:', response);
         try {
@@ -177,18 +207,6 @@ const CheckoutPage = () => {
           setLoading(false);
           navigate('/unable-to-place-order');
         }
-      },
-      prefill: {
-        name: formData.fullName,
-        email: formData.email,
-        contact: userData?.phone || ''
-      },
-      notes: {
-        address: `${formData.address}, ${formData.city}, ${formData.zipCode}, ${formData.country}`,
-        shipping_method: shippingMethod
-      },
-      theme: {
-        color: '#f39c12'
       }
     };
 
@@ -219,7 +237,16 @@ const CheckoutPage = () => {
       await initializeRazorpayPayment(parseFloat(summary.total));
     } catch (err) {
       console.error('Error initializing payment:', err);
-      setError('Failed to initialize payment. Please try again.');
+      
+      // Enhanced error handling for international payment issues
+      if (err.message && err.message.includes('international')) {
+        setError('International transaction error: Please ensure you are using the test card provided (4111 1111 1111 1111) and USD currency.');
+      } else if (err.error && err.error.description) {
+        setError(`Payment error: ${err.error.description}`);
+      } else {
+        setError('Failed to initialize payment. Please try again.');
+      }
+      
       setLoading(false);
     }
   };
@@ -401,6 +428,21 @@ const CheckoutPage = () => {
                 <p className="shipping-price">$12.99</p>
               </div>
             </div>
+          </div>
+        </div>
+        
+        {/* Test Payment Information */}
+        <div className="form-section">
+          <h3>Test Payment Information</h3>
+          <div className="test-payment-info">
+            <p>For testing international payments, use these card details:</p>
+            <ul className="test-card-list">
+              <li><strong>Card Number:</strong> 4111 1111 1111 1111</li>
+              <li><strong>Expiry:</strong> Any future date (e.g., 12/25)</li>
+              <li><strong>CVV:</strong> Any 3 digits (e.g., 123)</li>
+              <li><strong>Name:</strong> Any name</li>
+            </ul>
+            <p className="test-note">Note: All transactions are processed in USD currency for international compatibility.</p>
           </div>
         </div>
         

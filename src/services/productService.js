@@ -2,6 +2,7 @@
  * Product Service
  * Manages product data and operations
  */
+import axios from 'axios';
 
 // List of available tshirt images (IDs from 1-999 that exist in src/res/tshirt)
 const availableTshirtIds = [
@@ -19,6 +20,35 @@ const availableTshirtIds = [
   980, 981, 982, 983, 984, 985, 986, 987, 988, 989,
   990, 991, 992, 993, 994, 995, 996, 997, 998, 999
 ];
+
+// Store CSV data globally once loaded
+let csvTshirtData = null;
+
+// Load CSV data once
+const loadCsvData = async () => {
+  if (csvTshirtData !== null) return csvTshirtData;
+  
+  try {
+    const response = await axios.get('/api/products');
+    console.log('CSV Data fetched successfully:', response.data.length, 'products');
+    // Log a sample of the data to verify ratings
+    if (response.data.length > 0) {
+      console.log('Sample product data:', response.data[0]);
+      console.log('Sample product rating:', response.data[0]['User Ratings']);
+    }
+    csvTshirtData = response.data;
+    return csvTshirtData;
+  } catch (error) {
+    console.error('Error loading CSV data:', error);
+    return [];
+  }
+};
+
+// Get product by ID from CSV data
+export const getProductById = async (id) => {
+  const products = await loadCsvData();
+  return products.find(p => p['Product ID'] === id.toString()) || null;
+};
 
 // Weather suitability mappings based on product IDs
 const weatherSuitability = {
@@ -66,11 +96,11 @@ export const getTshirtImagePath = (id) => {
 };
 
 /**
- * Generates random tshirt product data
+ * Generates tshirt product data with actual ratings from CSV data
  * @param {number} count Number of products to generate
- * @returns {Array} Array of tshirt product data
+ * @returns {Promise<Array>} Array of tshirt product data
  */
-export const generateRandomTshirts = (count = 20) => {
+export const generateRandomTshirts = async (count = 20) => {
   const tshirts = [];
   const fitTypes = ['Regular Fit', 'Slim Fit', 'Loose Fit', 'Oversized Fit'];
   const colors = ['Black', 'White', 'Blue', 'Grey', 'Red', 'Green', 'Yellow', 'Brown', 'Pink', 'Purple'];
@@ -78,21 +108,44 @@ export const generateRandomTshirts = (count = 20) => {
   // Use random images from available IDs
   const randomIds = [...availableTshirtIds].sort(() => 0.5 - Math.random()).slice(0, count);
   
+  // Get CSV data to use real ratings if available
+  const csvData = await loadCsvData();
+  console.log('Generating tshirts with CSV data, items available:', csvData.length);
+  
   for (let i = 0; i < count; i++) {
     const id = randomIds[i];
     const fit = fitTypes[Math.floor(Math.random() * fitTypes.length)];
     const color = colors[Math.floor(Math.random() * colors.length)];
     const weatherConditions = productWeatherMap[id] || ['moderate'];
     
+    // Find this product in CSV data if available
+    const csvProduct = csvData.find(p => p['Product ID'] === id.toString());
+    
+    // Use real rating from CSV or fallback to random, ensuring it's a number
+    let rating;
+    if (csvProduct && csvProduct['User Ratings']) {
+      rating = parseFloat(csvProduct['User Ratings']);
+      // If parsing fails, use a fallback
+      if (isNaN(rating)) {
+        rating = (Math.random() * 2 + 3).toFixed(1);
+        console.warn(`Invalid rating for product ${id}, using fallback:`, rating);
+      } else {
+        console.log(`Using real rating for product ${id}:`, rating);
+      }
+    } else {
+      rating = (Math.random() * 2 + 3).toFixed(1);
+      console.warn(`No CSV rating for product ${id}, using fallback:`, rating);
+    }
+    
     tshirts.push({
       id,
-      name: `${fit} ${color} T-Shirt ${id}`,
+      name: csvProduct ? csvProduct['Product Name'] : `${fit} ${color} T-Shirt ${id}`,
       category: 'T-Shirt',
-      color,
-      fit,
-      price: (Math.random() * 30 + 15).toFixed(2),
+      color: csvProduct ? csvProduct['Color'] : color,
+      fit: csvProduct ? csvProduct['Fit Type'] : fit,
+      price: csvProduct ? csvProduct['Price'] : (Math.random() * 30 + 15).toFixed(2),
       image: `/res/tshirt/${id}.jpg`,
-      rating: (Math.random() * 2 + 3).toFixed(1),
+      rating: rating,
       weatherSuitability: weatherConditions
     });
   }
@@ -104,11 +157,11 @@ export const generateRandomTshirts = (count = 20) => {
  * Gets all products suitable for a specific weather condition
  * @param {string} weatherCondition Weather condition to filter by (hot, moderate, cold, rain, snow, windy)
  * @param {number} limit Maximum number of products to return (default: all)
- * @returns {Array} Array of products suitable for the given weather
+ * @returns {Promise<Array>} Array of products suitable for the given weather
  */
-export const getProductsByWeatherCondition = (weatherCondition, limit = null) => {
+export const getProductsByWeatherCondition = async (weatherCondition, limit = null) => {
   // Generate a pool of products
-  const allProducts = generateRandomTshirts(100);
+  const allProducts = await generateRandomTshirts(100);
   
   // Filter products by weather suitability
   let filteredProducts = allProducts.filter(product => 
@@ -164,5 +217,6 @@ export default {
   getTshirtImagePath,
   generateRandomTshirts,
   getProductsByWeatherCondition,
-  mapWeatherToCondition
+  mapWeatherToCondition,
+  getProductById
 }; 

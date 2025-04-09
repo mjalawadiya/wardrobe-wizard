@@ -6,7 +6,8 @@ import { FaFilter, FaSort, FaTimes, FaCloudSun, FaSearch } from 'react-icons/fa'
 import { generateRandomTshirts, getProductsByWeatherCondition } from '../services/productService.js';
 
 const ProductsContainer = styled.div`
-  max-width: 1200px;
+  max-width: 1400px;
+  width: 95%;
   margin: 0 auto;
   padding: 2rem;
 `;
@@ -26,9 +27,27 @@ const FiltersContainer = styled.div`
 
 const FilterSelect = styled.select`
   padding: 0.5rem 1rem;
+  padding-left: 2.5rem;
   border: 1px solid #ddd;
   border-radius: 5px;
   background-color: white;
+  position: relative;
+  appearance: none;
+`;
+
+const SelectWrapper = styled.div`
+  position: relative;
+  display: inline-block;
+  
+  svg {
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #f39c12;
+    font-size: 1rem;
+    pointer-events: none;
+  }
 `;
 
 const WeatherBadge = styled.div`
@@ -49,8 +68,16 @@ const WeatherBadge = styled.div`
 
 const ProductGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
+  
+  @media (max-width: 992px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: 576px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const NoResults = styled.div`
@@ -132,23 +159,28 @@ const Product = ({ searchQuery }) => {
 
   // Load products
   useEffect(() => {
-    setLoading(true);
-    
-    // Check if we're filtering by weather condition
-    if (weatherParam) {
-      // Get products suitable for the weather condition
-      const weatherProducts = getProductsByWeatherCondition(weatherParam, 20);
-      setProducts(weatherProducts);
-      setLoading(false);
-    } else {
-      // Use our product service instead of hardcoded data
-      setTimeout(() => {
-        // Generate a larger set of random products
-        const productData = generateRandomTshirts(50);
-        setProducts(productData);
+    const loadProducts = async () => {
+      setLoading(true);
+      
+      try {
+        // Check if we're filtering by weather condition
+        if (weatherParam) {
+          // Get products suitable for the weather condition
+          const weatherProducts = await getProductsByWeatherCondition(weatherParam, 20);
+          setProducts(weatherProducts);
+        } else {
+          // Use our product service
+          const productData = await generateRandomTshirts(50);
+          setProducts(productData);
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+      } finally {
         setLoading(false);
-      }, 500);
-    }
+      }
+    };
+    
+    loadProducts();
   }, [weatherParam]);
 
   // Filter and sort products
@@ -287,29 +319,35 @@ const Product = ({ searchQuery }) => {
       </SearchContainer>
       
       <FiltersContainer>
-        <FilterSelect 
-          value={sortOption} 
-          onChange={(e) => setSortOption(e.target.value)}
-        >
-          <option value="">Sort By</option>
-          <option value="price-asc">Price: Low to High</option>
-          <option value="price-desc">Price: High to Low</option>
-          <option value="rating">Top Rated</option>
-          <option value="name">Name</option>
-        </FilterSelect>
+        <SelectWrapper>
+          <FaSort />
+          <FilterSelect 
+            value={sortOption} 
+            onChange={(e) => setSortOption(e.target.value)}
+          >
+            <option value="">Sort By</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="rating">Rating</option>
+            <option value="name">Name</option>
+          </FilterSelect>
+        </SelectWrapper>
         
-        <FilterSelect 
-          value={filterOption} 
-          onChange={(e) => setFilterOption(e.target.value)}
-        >
-          <option value="">Filter By</option>
-          <option value="color-black">Color: Black</option>
-          <option value="color-white">Color: White</option>
-          <option value="fit-regular">Fit: Regular</option>
-          <option value="fit-slim">Fit: Slim</option>
-          <option value="fit-loose">Fit: Loose</option>
-          <option value="fit-oversized">Fit: Oversized</option>
-        </FilterSelect>
+        <SelectWrapper>
+          <FaFilter />
+          <FilterSelect 
+            value={filterOption} 
+            onChange={(e) => setFilterOption(e.target.value)}
+          >
+            <option value="">Filter By</option>
+            <option value="color-black">Color: Black</option>
+            <option value="color-white">Color: White</option>
+            <option value="fit-regular">Fit: Regular</option>
+            <option value="fit-slim">Fit: Slim</option>
+            <option value="fit-loose">Fit: Loose</option>
+            <option value="fit-oversized">Fit: Oversized</option>
+          </FilterSelect>
+        </SelectWrapper>
       </FiltersContainer>
       
       {loading ? (
@@ -321,13 +359,7 @@ const Product = ({ searchQuery }) => {
           {filteredProducts.map(product => (
             <ProductCard 
               key={product.id}
-              id={product.id}
-              name={product.name}
-              price={product.price}
-              rating={product.rating}
-              category={product.fit}
-              addToCart={handleAddToCart}
-              addToWishlist={handleAddToWishlist}
+              product={product}
             />
           ))}
         </ProductGrid>

@@ -1,15 +1,15 @@
 import React from 'react';
 import VirtualTryOn from '../components/VirtualTryOn.js';
-import '../styles/pages/VirtualTryOnPage.css';
+import '../styles/pages/virtualTryOn.css';
 
 const VirtualTryOnPage = () => {
     return (
         <div className="virtual-try-on-page">
-            <div className="page-header">
+            <div className="virtual-try-on-container">
                 <h1>Virtual Try-On Experience</h1>
-                <p>Upload your photos and see how our clothes look on you!</p>
-            </div>
-            <div className="virtual-try-on-wrapper">
+                <p className="try-on-description">
+                    Upload your photos and see how our clothes look on you!
+                </p>
                 <VirtualTryOn />
             </div>
         </div>

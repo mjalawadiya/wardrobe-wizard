@@ -16,7 +16,7 @@ const AboutPage = () => {
           <h2 className="section-title">Our Story</h2>
         </div>
         <div className="section-content">
-          <p>WardrobeWizard was founded in 2023 with a simple mission: to make fashion accessible, 
+          <p>WardrobeWizard was founded in 2025 with a simple mission: to make fashion accessible, 
           personalized, and stress-free for everyone. What started as a small online store has 
           grown into a platform that combines technology and fashion to create a unique shopping experience.</p>
           
@@ -50,24 +50,24 @@ const AboutPage = () => {
         </div>
         <div className="section-content team-grid">
           <div className="team-member">
-            <div className="member-avatar">JD</div>
-            <h3>Jamie Davis</h3>
-            <p>Founder & CEO</p>
+            <div className="member-avatar">AE</div>
+            <h3>Ammar Engineer</h3>
+            <p>Backend Developement and Integration</p>
           </div>
           <div className="team-member">
-            <div className="member-avatar">AS</div>
-            <h3>Alex Smith</h3>
-            <p>Head of Design</p>
+            <div className="member-avatar">UJ</div>
+            <h3>Umed Jogi</h3>
+            <p>Virtual Try On Model and Image Processing</p>
           </div>
           <div className="team-member">
-            <div className="member-avatar">MP</div>
-            <h3>Maria Perez</h3>
-            <p>Chief Technology Officer</p>
+            <div className="member-avatar">MJ</div>
+            <h3>Mehek Jalawadiya</h3>
+            <p>Frontend Developement (UI/UX Design)</p>
           </div>
           <div className="team-member">
-            <div className="member-avatar">RK</div>
-            <h3>Ryan Kim</h3>
-            <p>Customer Experience</p>
+            <div className="member-avatar">ML</div>
+            <h3>Maria Lokhandwala</h3>
+            <p>API Handling and Database Management</p>
           </div>
         </div>
       </section>

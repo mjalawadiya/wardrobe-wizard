@@ -1,0 +1,28 @@
+.virtual-try-on-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.virtual-try-on-container {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.virtual-try-on-container h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.try-on-description {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #666;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+} 

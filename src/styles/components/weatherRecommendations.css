@@ -113,7 +113,7 @@
 /* New styles for product recommendations */
 .product-recommendations {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.2rem;
   margin-top: 1rem;
 }
@@ -177,7 +177,7 @@
   }
   
   .product-recommendations {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .weather-condition {
@@ -229,7 +229,11 @@
 .auth-message {
   text-align: center;
   padding: 2rem;
-  max-width: 450px;
+  max-width: 600px;
+  margin: 2rem auto;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
 }
 
 .auth-icon {
@@ -247,6 +251,8 @@
 .auth-message p {
   color: #7f8c8d;
   margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
 }
 
 .auth-button {

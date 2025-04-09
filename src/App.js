@@ -80,7 +80,11 @@ function App() {
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/order-confirmed" element={<OrderConfirmed />} />
             <Route path="/unable-to-place-order" element={<UnableToPlaceOrder />} />
-            <Route path="/virtual-tryon" element={<VirtualTryOnPage />} />
+            <Route path="/virtual-tryon" element={
+              <AuthGuard>
+                <VirtualTryOnPage />
+              </AuthGuard>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

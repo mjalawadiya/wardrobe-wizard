@@ -22,6 +22,37 @@ const ProductCard = (props) => {
   // State to track if we should preload the detail image
   const [isHovered, setIsHovered] = useState(false);
   
+  // Handle the case where the component receives a product object instead of individual props
+  // This needs to happen BEFORE we use any of these properties
+  if (!name && product) {
+    const productObj = product;
+    id = productObj['Product ID'] || productObj.id;
+    name = productObj['Product Name'] || productObj.name;
+    price = productObj['Price'] || productObj.price;
+    
+    // Explicitly handle rating from CSV data, ensuring it's a number
+    if (productObj['User Ratings']) {
+      rating = parseFloat(productObj['User Ratings']);
+      if (isNaN(rating)) {
+        console.warn(`Invalid rating value in product object: ${productObj['User Ratings']}`);
+        rating = 0;
+      }
+    } else if (productObj.rating) {
+      rating = parseFloat(productObj.rating);
+      if (isNaN(rating)) {
+        console.warn(`Invalid rating value in product.rating: ${productObj.rating}`);
+        rating = 0;
+      }
+    } else {
+      rating = 0;
+    }
+    
+    image = productObj['Image'] || productObj.image;
+    discount = productObj['Discount Price'];
+    isNew = productObj['New Arrival'];
+    category = productObj['Fit Type'] || productObj.category;
+  }
+  
   useEffect(() => {
     // Get user data from localStorage
     const userDataString = localStorage.getItem('userData');
@@ -43,22 +74,37 @@ const ProductCard = (props) => {
   
   // Generate rating stars
   const ratingValue = parseFloat(rating) || 0;
-  const ratingStars = [...Array(5)].map((_, i) => (
-    <FaStar key={i} style={{ opacity: i < Math.floor(ratingValue) ? 1 : 0.3 }} />
-  ));
-
-  // Handle the case where the component receives a product object instead of individual props
-  if (!name && product) {
-    const productObj = product;
-    id = productObj['Product ID'] || productObj.id;
-    name = productObj['Product Name'] || productObj.name;
-    price = productObj['Price'] || productObj.price;
-    rating = productObj['User Ratings'] || productObj.rating;
-    image = productObj['Image'] || productObj.image;
-    discount = productObj['Discount Price'];
-    isNew = productObj['New Arrival'];
-    category = productObj['Fit Type'] || productObj.category;
-  }
+  console.log('Product Card Rating:', { id, rating, ratingValue });
+  
+  const ratingStars = [...Array(5)].map((_, i) => {
+    // More pronounced star styling for better visibility
+    if (i < Math.floor(ratingValue)) {
+      // Full star
+      return <FaStar key={i} style={{ 
+        color: '#f39c12',
+        fontSize: '18px',
+        marginRight: '2px',
+        filter: 'drop-shadow(0px 0px 1px rgba(0,0,0,0.3))'
+      }} />;
+    } else if (i === Math.floor(ratingValue) && ratingValue % 1 >= 0.5) {
+      // Half star
+      return <FaStar key={i} style={{ 
+        color: '#f39c12', 
+        opacity: 0.6,
+        fontSize: '18px',
+        marginRight: '2px',
+        filter: 'drop-shadow(0px 0px 1px rgba(0,0,0,0.3))'
+      }} />;
+    } else {
+      // Empty star
+      return <FaStar key={i} style={{ 
+        color: '#d1d1d1',
+        fontSize: '18px',
+        marginRight: '2px',
+        filter: 'drop-shadow(0px 0px 1px rgba(0,0,0,0.3))'
+      }} />;
+    }
+  });
 
   // Always use the ID-based path for tshirt images
   const getImagePath = () => {
@@ -223,7 +269,7 @@ const ProductCard = (props) => {
         
         <div className="rating-container">
           <div className="rating-stars">{ratingStars}</div>
-          <span className="rating-text">({ratingValue})</span>
+          <span className="rating-text">({parseFloat(ratingValue).toFixed(1)})</span>
         </div>
         
         <div className="buttons-container">
