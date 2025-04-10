@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaStore, FaUsers, FaAward, FaTshirt, FaHandshake } from 'react-icons/fa';
+import { FaStore, FaUsers, FaAward, FaTshirt, FaHandshake, FaCode } from 'react-icons/fa';
 import '../styles/pages/about.css';
 
 const AboutPage = () => {
@@ -40,6 +40,55 @@ const AboutPage = () => {
           <p>Every item in our store is carefully selected based on quality, comfort, style, and 
           versatility. We offer a range of sizes and fits to ensure that everyone can find 
           clothes that make them look and feel their best.</p>
+        </div>
+      </section>
+      
+      <section className="about-section">
+        <div className="section-header">
+          <FaCode className="section-icon" />
+          <h2 className="section-title">Technology Stack</h2>
+        </div>
+        <div className="section-content">
+          <p>WardrobeWizard is built using cutting-edge technologies to provide a seamless and 
+          innovative shopping experience:</p>
+          
+          <div className="tech-grid">
+            <div className="tech-item">
+              <h3>Frontend</h3>
+              <ul>
+                <li>React.js</li>
+                <li>CSS3 with Flexbox/Grid</li>
+                <li>React Icons</li>
+                <li>Axios for API calls</li>
+              </ul>
+            </div>
+            <div className="tech-item">
+              <h3>Backend</h3>
+              <ul>
+                <li>Node.js</li>
+                <li>Express.js</li>
+                <li>MongoDB</li>
+                <li>JWT Authentication</li>
+              </ul>
+            </div>
+            <div className="tech-item">
+              <h3>AI Features</h3>
+              <ul>
+                <li>Virtual Try-On Model</li>
+                <li>Image Processing APIs</li>
+                <li>Recommendation Engine</li>
+              </ul>
+            </div>
+            <div className="tech-item">
+              <h3>DevOps & Tools</h3>
+              <ul>
+                <li>Git & GitHub</li>
+                <li>RESTful APIs</li>
+                <li>Responsive Design</li>
+                <li>Cross-browser compatibility</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
       
