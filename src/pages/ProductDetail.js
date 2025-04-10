@@ -621,7 +621,7 @@ const ProductDetail = () => {
   // Default values and flags
   const isOutOfStock = product['Availability'] === 'Out of Stock';
   const productName = product['Product Name'] || product.name;
-  const productPrice = parseFloat(product['Price'] || product.price).toFixed(2);
+  const productPrice = parseFloat(product['Price'] || product.price);
   const productRating = parseFloat(product['User Ratings'] || product.rating);
   const productDesc = product['Product Description'] || product.description || 'A high-quality t-shirt for everyday wear.';
   
@@ -682,7 +682,12 @@ const ProductDetail = () => {
               <RatingText>({productRating} out of 5)</RatingText>
             </RatingContainer>
             
-            <ProductPrice>${productPrice}</ProductPrice>
+            <ProductPrice>
+              {new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+              }).format(productPrice * 75)}
+            </ProductPrice>
             
             <ProductDescription>
               {productDesc}

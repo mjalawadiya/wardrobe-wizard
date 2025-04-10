@@ -95,18 +95,18 @@ const CheckoutPage = () => {
     const subtotal = cartItems.reduce((total, item) => {
       const price = item.productDetails && 
         (item.productDetails['Discount Price'] || item.productDetails['Price']);
-      return total + (parseFloat(price) * item.quantity);
+      return total + (parseFloat(price) * 75 * item.quantity);
     }, 0);
     
     // Shipping cost based on method
     let shipping = 0;
     if (shippingMethod === 'express') {
-      shipping = 12.99;
+      shipping = 999;
     } else if (shippingMethod === 'standard') {
-      shipping = subtotal > 50 ? 0 : 5.99;
+      shipping = subtotal > 3750 ? 0 : 449;
     }
     
-    const tax = subtotal * 0.07; // 7% tax
+    const tax = subtotal * 0.18; // 18% GST
     const total = subtotal + shipping + tax;
     
     return {
@@ -121,33 +121,15 @@ const CheckoutPage = () => {
   const initializeRazorpayPayment = async (orderAmount) => {
     const options = {
       key: 'rzp_test_l3iiBr281IE9vB',
-      amount: Math.round(orderAmount * 100), // RazorPay expects amount in smallest currency unit
-      currency: 'USD', // Changed from INR to USD for international transactions
+      amount: Math.round(orderAmount * 100), // RazorPay expects amount in paise
+      currency: 'INR',
       name: 'Wardrobe Wizard',
       description: 'Purchase from Wardrobe Wizard',
       image: '/logo192.png',
-      // Enable international payments
-      config: {
-        display: {
-          blocks: {
-            international: {
-              currencies: ['USD']
-            }
-          },
-          preferences: {
-            show_default_blocks: true
-          }
-        }
-      },
-      // Add card details for testing
       prefill: {
         name: formData.fullName,
         email: formData.email,
-        contact: userData?.phone || '',
-        method: 'card',
-        'card[number]': '4111111111111111',
-        'card[expiry]': '12/25',
-        'card[cvv]': '123'
+        contact: userData?.phone || ''
       },
       notes: {
         address: `${formData.address}, ${formData.city}, ${formData.zipCode}, ${formData.country}`,
@@ -414,7 +396,7 @@ const CheckoutPage = () => {
                 <h4>Standard Shipping</h4>
                 <p>5-7 business days</p>
                 <p className="shipping-price">
-                  {calculateSummary().subtotal > 50 ? 'FREE' : '$5.99'}
+                  {calculateSummary().subtotal > 3750 ? 'FREE' : '₹449'}
                 </p>
               </div>
             </div>
@@ -425,7 +407,7 @@ const CheckoutPage = () => {
               <div className="option-details">
                 <h4>Express Shipping</h4>
                 <p>2-3 business days</p>
-                <p className="shipping-price">$12.99</p>
+                <p className="shipping-price">₹999</p>
               </div>
             </div>
           </div>
@@ -452,19 +434,31 @@ const CheckoutPage = () => {
           <div className="summary-details">
             <div className="summary-row">
               <span>Subtotal</span>
-              <span>${calculateSummary().subtotal}</span>
+              <span>{new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+              }).format(parseFloat(calculateSummary().subtotal))}</span>
             </div>
             <div className="summary-row">
               <span>Shipping</span>
-              <span>${calculateSummary().shipping}</span>
+              <span>{new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+              }).format(parseFloat(calculateSummary().shipping))}</span>
             </div>
             <div className="summary-row">
-              <span>Tax</span>
-              <span>${calculateSummary().tax}</span>
+              <span>GST (18%)</span>
+              <span>{new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+              }).format(parseFloat(calculateSummary().tax))}</span>
             </div>
             <div className="summary-row total">
               <span>Total</span>
-              <span>${calculateSummary().total}</span>
+              <span>{new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+              }).format(parseFloat(calculateSummary().total))}</span>
             </div>
           </div>
         </div>

@@ -106,8 +106,8 @@ const TermsPage = () => {
           
           <h3>Free Shipping</h3>
           <p>
-            Orders over $50 qualify for free standard shipping within the continental United States. 
-            Additional fees may apply for expedited shipping, international shipping, or oversized items.
+            Orders over ₹3,750 qualify for free standard shipping within India. 
+            Additional fees may apply for expedited shipping or oversized items.
           </p>
           
           <h3>International Shipping</h3>
@@ -161,22 +161,21 @@ const TermsPage = () => {
         <div className="section-content">
           <h3>Payment Methods</h3>
           <p>
-            We accept major credit cards (Visa, MasterCard, American Express, Discover), 
-            PayPal, and other payment methods as indicated at checkout.
+            We accept all major credit cards, debit cards, UPI, net banking, and other payment methods 
+            supported by Razorpay. All transactions are processed securely through our payment partner.
           </p>
           
           <h3>Pricing and Taxes</h3>
           <p>
-            All prices are listed in US dollars and are subject to change without notice. 
-            Applicable sales tax will be added to your order based on your shipping address 
-            and local tax regulations.
+            All prices are listed in Indian Rupees (INR) and are subject to change without notice. 
+            Applicable GST (18%) will be added to your order as per Indian tax regulations.
           </p>
           
           <h3>Secure Transactions</h3>
           <p>
             We use industry-standard encryption and security measures to protect your payment 
-            information during transmission. However, no method of electronic transmission or 
-            storage is 100% secure, and we cannot guarantee absolute security.
+            information during transmission. All payments are processed through Razorpay's secure 
+            payment gateway.
           </p>
         </div>
       </section>

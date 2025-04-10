@@ -188,22 +188,22 @@ const ProductList = ({ products, searchQuery, addToCart, addToWishlist }) => {
     if (filters.priceRange) {
       switch (filters.priceRange) {
         case 'under20':
-          filtered = filtered.filter(product => parseFloat(product['Price']) < 20);
+          filtered = filtered.filter(product => parseFloat(product['Price']) * 75 < 1500);
           break;
         case '20to30':
           filtered = filtered.filter(product => {
-            const price = parseFloat(product['Price']);
-            return price >= 20 && price <= 30;
+            const price = parseFloat(product['Price']) * 75;
+            return price >= 1500 && price <= 2250;
           });
           break;
         case '30to40':
           filtered = filtered.filter(product => {
-            const price = parseFloat(product['Price']);
-            return price > 30 && price <= 40;
+            const price = parseFloat(product['Price']) * 75;
+            return price > 2250 && price <= 3000;
           });
           break;
         case 'over40':
-          filtered = filtered.filter(product => parseFloat(product['Price']) > 40);
+          filtered = filtered.filter(product => parseFloat(product['Price']) * 75 > 3000);
           break;
         default:
           // No price filter
@@ -270,10 +270,10 @@ const ProductList = ({ products, searchQuery, addToCart, addToWishlist }) => {
     if (filters.priceRange) {
       let priceLabel = '';
       switch (filters.priceRange) {
-        case 'under20': priceLabel = 'Under $20'; break;
-        case '20to30': priceLabel = '$20 - $30'; break;
-        case '30to40': priceLabel = '$30 - $40'; break;
-        case 'over40': priceLabel = 'Over $40'; break;
+        case 'under20': priceLabel = 'Under ₹1,500'; break;
+        case '20to30': priceLabel = '₹1,500 - ₹2,250'; break;
+        case '30to40': priceLabel = '₹2,250 - ₹3,000'; break;
+        case 'over40': priceLabel = 'Over ₹3,000'; break;
         default: priceLabel = '';
       }
       applied.push({ name: 'priceRange', value: priceLabel });
@@ -348,10 +348,10 @@ const ProductList = ({ products, searchQuery, addToCart, addToWishlist }) => {
                 onChange={handleFilterChange}
               >
                 <option value="">All Prices</option>
-                <option value="under20">Under $20</option>
-                <option value="20to30">$20 - $30</option>
-                <option value="30to40">$30 - $40</option>
-                <option value="over40">Over $40</option>
+                <option value="under20">Under ₹1,500</option>
+                <option value="20to30">₹1,500 - ₹2,250</option>
+                <option value="30to40">₹2,250 - ₹3,000</option>
+                <option value="over40">Over ₹3,000</option>
               </FilterSelect>
             </FilterGroup>
 

@@ -120,11 +120,11 @@ const Cart = () => {
     const subtotal = cartItems.reduce((total, item) => {
       const price = item.productDetails && 
         (item.productDetails['Discount Price'] || item.productDetails['Price']);
-      return total + (parseFloat(price) * item.quantity);
+      return total + (parseFloat(price) * 75 * item.quantity);
     }, 0);
     
-    const shipping = subtotal > 50 ? 0 : 5.99;
-    const tax = subtotal * 0.07; // 7% tax
+    const shipping = subtotal > 3750 ? 0 : 449; // Free shipping over ₹3,750
+    const tax = subtotal * 0.18; // 18% GST
     const total = subtotal + shipping + tax;
     
     return {
@@ -235,7 +235,10 @@ const Cart = () => {
                 <span>Fit: {item.productDetails['Fit Type']}</span>
               </div>
               <div className="item-price">
-                ${item.productDetails['Discount Price'] || item.productDetails['Price']}
+                {new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD'
+                }).format(parseFloat(item.productDetails['Discount Price'] || item.productDetails['Price']))}
               </div>
             </div>
             

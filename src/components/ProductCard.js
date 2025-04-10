@@ -262,9 +262,19 @@ const ProductCard = (props) => {
         
         <div className="price-container">
           <span className="product-price">
-            ${hasDiscount ? discount : price}
+            {new Intl.NumberFormat('en-IN', {
+              style: 'currency',
+              currency: 'INR'
+            }).format((hasDiscount ? discount : price) * 75)}
           </span>
-          {hasDiscount && <span className="old-price">${price}</span>}
+          {hasDiscount && (
+            <span className="old-price">
+              {new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR'
+              }).format(price * 75)}
+            </span>
+          )}
         </div>
         
         <div className="rating-container">
