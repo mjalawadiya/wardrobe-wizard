@@ -66,24 +66,23 @@ Make sure you have **Node.js**, **npm**, **Python 3**, and **MongoDB** installed
 
 ### 1️⃣ Clone the Repository
 
-```bash
-git clone https://github.com/mjalawadiya/wardrobe-wizard.git
-cd wardrobe-wizard
+- git clone https://github.com/mjalawadiya/wardrobe-wizard.git
+- cd wardrobe-wizard
 
 ### 2️⃣ Run the Python Virtual Try-On Server
-cd server/python_server
-python app.py
+- cd server/python_server
+- python app.py
 📍 Ensure dependencies like flask, opencv-python, etc., are installed.
 
 ### 3️⃣ Run the Node.js Backend Server
-cd ../
-node server.js
+- cd ../
+- node server.js
 ✅ Make sure MongoDB is running locally or update connection URI in the backend config.
 
 ### 4️⃣ Run the React Frontend
-cd ../client
-npm install
-npm start
+- cd ../client
+- npm install
+- npm start
 🚀 The frontend will run at http://localhost:3000
 
 ✅ Testing Strategy
