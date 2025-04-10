@@ -1,70 +1,101 @@
-# Getting Started with Create React App
+# 👗✨ Wardrobe Wizard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Wardrobe Wizard** is an innovative MERN-based e-commerce platform that combines the latest in weather data integration, personalized fashion recommendations, and virtual try-on experiences using Python-based image processing. Designed with usability and creativity in mind, this application transforms the way users shop for clothing online.
 
-## Available Scripts
+![Wardrobe Wizard Banner](https://via.placeholder.com/1000x300?text=Wardrobe+Wizard)
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🌐 Live Demo
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+🚧 Coming Soon
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 📦 Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Frontend:** React, JavaScript, CSS, HTML
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB
+- **Authentication:** JWT
+- **Weather Integration:** External Weather API
+- **Virtual Try-On:** Python Server using OpenCV/Image Processing
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🔥 Features
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 🛍️ E-commerce Platform
+- Secure registration/login with JWT
+- Product catalog with categories, filters & search
+- Add to cart, wishlist, and checkout functionality
+- Persistent cart, order history, address management
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 🌦️ Weather-Based Recommendations
+- Real-time weather integration via API
+- Product suggestions based on local forecast
+- Personalized styling based on browsing history
 
-### `npm run eject`
+### 🧥 Virtual Try-On (Python Server)
+- Upload an image and try on clothes virtually
+- Integrated via a Python backend service
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 🔒 Security
+- Bcrypt for password encryption
+- CSRF & XSS protection
+- Tokenized payment handling
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📁 Project Structure
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+WardrobeWizard/ 
+├── client/ # React frontend 
+├── server/ 
+   ├── python_server/ # Virtual Try-On backend 
+   └── server.js # Node backend entry point 
+│
+├── README.md 
+│
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🛠️ Installation & Running the Project
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Make sure you have **Node.js**, **npm**, **Python 3**, and **MongoDB** installed.
 
-### Code Splitting
+### 1️⃣ Clone the Repository
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+git clone https://github.com/mjalawadiya/wardrobe-wizard.git
+cd wardrobe-wizard
 
-### Analyzing the Bundle Size
+### 2️⃣ Run the Python Virtual Try-On Server
+cd server/python_server
+python app.py
+📍 Ensure dependencies like flask, opencv-python, etc., are installed.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 3️⃣ Run the Node.js Backend Server
+cd ../
+node server.js
+✅ Make sure MongoDB is running locally or update connection URI in the backend config.
 
-### Making a Progressive Web App
+### 4️⃣ Run the React Frontend
+cd ../client
+npm install
+npm start
+🚀 The frontend will run at http://localhost:3000
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+✅ Testing Strategy
+- Unit Tests: React Testing Library + Jest
 
-### Advanced Configuration
+- Integration Tests: Cypress
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- API Tests: Postman collections
 
-### Deployment
+- Performance: Lazy loading, image optimization
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+🔗 GitHub Repository
+🔗 https://github.com/mjalawadiya/wardrobe-wizard/tree/ammar-vton
 
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+**“Fashion meets function — Your personalized wardrobe experience, reimagined.”**
